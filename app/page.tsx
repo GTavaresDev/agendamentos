@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   Bell,
@@ -457,8 +457,8 @@ function Users({ showToast }: { showToast: (message: string) => void }) {
   );
 }
 
-function AppShell({ onLogout }: { onLogout: () => void }) {
-  const [view, setView] = useState<View>("dashboard");
+function AppShell({ onLogout, initialView = "dashboard" }: { onLogout: () => void; initialView?: View }) {
+  const [view, setView] = useState<View>(initialView);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [toast, setToast] = useState("");
   const titles = {
@@ -490,5 +490,13 @@ function AppShell({ onLogout }: { onLogout: () => void }) {
 
 export default function Home() {
   const [authenticated, setAuthenticated] = useState(false);
-  return authenticated ? <AppShell onLogout={() => setAuthenticated(false)} /> : <Login onLogin={() => setAuthenticated(true)} />;
+  const [requestedView, setRequestedView] = useState<View>("dashboard");
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("view") === "agendamentos") {
+      setRequestedView("agendamentos");
+    }
+  }, []);
+
+  return authenticated ? <AppShell initialView={requestedView} onLogout={() => setAuthenticated(false)} /> : <Login onLogin={() => setAuthenticated(true)} />;
 }
