@@ -68,7 +68,7 @@ export function ClinicLanding() {
         <div className="mx-auto flex h-[76px] max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-12">
           <a href="#inicio" className="flex items-center gap-3">
             <span className="flex size-9 items-center justify-center rounded-full border border-[#c9ad93] text-[#9a7454]"><Sparkles className="size-4" /></span>
-            <span className="font-serif text-2xl tracking-[-0.03em]">Lumière</span>
+            <span className="font-serif text-2xl tracking-[-0.03em]">VisioNew</span>
             <span className="hidden border-l border-zinc-300 pl-3 text-[9px] font-semibold uppercase leading-3 tracking-[0.18em] text-zinc-400 sm:block">Clínica<br />Estética</span>
           </a>
           <nav className="hidden items-center gap-8 text-sm font-medium text-zinc-600 lg:flex">
@@ -85,7 +85,7 @@ export function ClinicLanding() {
 
       {menuOpen && (
         <div className="fixed inset-0 z-[60] bg-[#25211e] p-6 text-white lg:hidden">
-          <div className="flex items-center justify-between"><span className="font-serif text-2xl">Lumière</span><button aria-label="Fechar menu" onClick={() => setMenuOpen(false)} className="flex size-10 items-center justify-center rounded-full border border-white/20"><X /></button></div>
+          <div className="flex items-center justify-between"><span className="font-serif text-2xl">VisioNew</span><button aria-label="Fechar menu" onClick={() => setMenuOpen(false)} className="flex size-10 items-center justify-center rounded-full border border-white/20"><X /></button></div>
           <nav className="mt-20 flex flex-col gap-7 font-serif text-4xl">
             {[['sobre','A clínica'],['tratamentos','Tratamentos'],['avaliacoes','Avaliações'],['faq','Dúvidas'],['contato','Contato']].map(([href, label]) => <a key={href} href={`#${href}`} onClick={() => setMenuOpen(false)}>{label}</a>)}
           </nav>
@@ -132,7 +132,7 @@ export function ClinicLanding() {
         <section id="sobre" className="mx-auto grid max-w-[1320px] gap-12 px-5 py-24 sm:px-8 lg:grid-cols-[.82fr_1.18fr] lg:px-12 lg:py-32">
           <div><span className="text-xs font-semibold uppercase tracking-[0.18em] text-[#a47a5a]">A clínica</span><h2 className="mt-5 max-w-md font-serif text-5xl leading-[1.05] tracking-[-0.035em] sm:text-6xl">Beleza não é sobre mudar. É sobre <em className="text-[#a47a5a]">revelar.</em></h2></div>
           <div className="lg:pt-10">
-            <p className="max-w-2xl text-xl leading-8 text-zinc-700">Na Lumière, cada tratamento começa pela escuta. Acreditamos em uma estética que respeita seus traços, sua história e o seu tempo.</p>
+            <p className="max-w-2xl text-xl leading-8 text-zinc-700">Na VisioNew, cada tratamento começa pela escuta. Acreditamos em uma estética que respeita seus traços, sua história e o seu tempo.</p>
             <p className="mt-5 max-w-2xl leading-7 text-zinc-500">Nossa equipe combina conhecimento técnico, tecnologias seguras e sensibilidade para criar resultados elegantes e naturais. Sem padrões prontos, sem excessos — apenas escolhas cuidadosas para você se sentir ainda mais confiante.</p>
             <div className="mt-10 grid gap-4 sm:grid-cols-3">
               {[{icon:ShieldCheck,title:'Segurança',text:'Protocolos rigorosos e produtos aprovados.'},{icon:Sparkles,title:'Naturalidade',text:'Resultados que valorizam sua identidade.'},{icon:Heart,title:'Acolhimento',text:'Escuta ativa em todas as etapas.'}].map(({icon:Icon,title,text}) => <div key={title} className="rounded-2xl border border-[#e8ded5] bg-white p-5"><Icon className="size-5 text-[#a47a5a]" /><h3 className="mt-4 text-sm font-semibold">{title}</h3><p className="mt-2 text-xs leading-5 text-zinc-500">{text}</p></div>)}
@@ -187,12 +187,12 @@ export function ClinicLanding() {
 
       <footer id="contato" className="bg-[#25211e] px-5 pb-8 pt-20 text-white sm:px-8 lg:px-12">
         <div className="mx-auto grid max-w-[1320px] gap-12 border-b border-white/10 pb-14 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
-          <div><div className="flex items-center gap-3"><span className="flex size-9 items-center justify-center rounded-full border border-[#d4ae8f] text-[#d4ae8f]"><Sparkles className="size-4" /></span><span className="font-serif text-3xl">Lumière</span></div><p className="mt-5 max-w-xs text-sm leading-6 text-zinc-400">Estética com propósito, ciência e naturalidade. Um espaço para cuidar de você por inteiro.</p><a href="#" className="mt-6 inline-flex size-10 items-center justify-center rounded-full border border-white/15 hover:bg-white hover:text-zinc-950"><Instagram className="size-4" /></a></div>
+          <div><div className="flex items-center gap-3"><span className="flex size-9 items-center justify-center rounded-full border border-[#d4ae8f] text-[#d4ae8f]"><Sparkles className="size-4" /></span><span className="font-serif text-3xl">VisioNew</span></div><p className="mt-5 max-w-xs text-sm leading-6 text-zinc-400">Estética com propósito, ciência e naturalidade. Um espaço para cuidar de você por inteiro.</p><a href="#" className="mt-6 inline-flex size-10 items-center justify-center rounded-full border border-white/15 hover:bg-white hover:text-zinc-950"><Instagram className="size-4" /></a></div>
           <div><h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[#d4ae8f]">Navegue</h3><div className="mt-5 space-y-3 text-sm text-zinc-400"><a className="block hover:text-white" href="#sobre">A clínica</a><a className="block hover:text-white" href="#tratamentos">Tratamentos</a><a className="block hover:text-white" href="#avaliacoes">Avaliações</a><a className="block hover:text-white" href="#faq">Dúvidas</a></div></div>
           <div><h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[#d4ae8f]">Atendimento</h3><div className="mt-5 space-y-4 text-sm text-zinc-400"><p className="flex items-start gap-2"><Clock3 className="mt-0.5 size-4 shrink-0" /> Seg–Sex, 9h às 19h<br />Sábado, 9h às 14h</p><p className="flex items-center gap-2"><Phone className="size-4" /> (11) 3456-7890</p><p className="flex items-center gap-2"><MessageCircle className="size-4" /> (11) 99876-5432</p></div></div>
           <div><h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[#d4ae8f]">Onde estamos</h3><p className="mt-5 flex items-start gap-2 text-sm leading-6 text-zinc-400"><MapPin className="mt-1 size-4 shrink-0" /> Rua das Magnólias, 248<br />Jardins — São Paulo, SP</p><a href="#" className="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-white underline underline-offset-4">Como chegar <ArrowRight className="size-3" /></a></div>
         </div>
-        <div className="mx-auto flex max-w-[1320px] flex-col justify-between gap-3 pt-6 text-[11px] text-zinc-500 sm:flex-row"><span>© 2026 Lumière Clínica. MVP demonstrativo.</span><span>Foto de Gustavo Fring via Pexels.</span><div className="flex gap-5"><a href="#">Privacidade</a><a href="#">Termos</a></div></div>
+        <div className="mx-auto flex max-w-[1320px] flex-col justify-between gap-3 pt-6 text-[11px] text-zinc-500 sm:flex-row"><span>© 2026 VisioNew Clínica. MVP demonstrativo.</span><span>Foto de Gustavo Fring via Pexels.</span><div className="flex gap-5"><a href="#">Privacidade</a><a href="#">Termos</a></div></div>
       </footer>
 
       <a href="#contato" aria-label="Falar pelo WhatsApp" className="fixed bottom-5 right-5 z-40 flex size-12 items-center justify-center rounded-full bg-[#25211e] text-white shadow-2xl transition hover:-translate-y-1"><MessageCircle className="size-5" /></a>
