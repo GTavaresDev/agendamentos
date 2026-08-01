@@ -12,6 +12,7 @@ import {
   CircleUserRound,
   Clock3,
   LayoutDashboard,
+  ChartNoAxesCombined,
   LogOut,
   Menu,
   MoreHorizontal,
@@ -170,6 +171,12 @@ function Sidebar({ view, setView, onLogout, mobileOpen, setMobileOpen }: { view:
             </button>
           ))}
         </nav>
+        <a
+          href="/relatorios"
+          className="mt-1 flex h-11 w-full items-center gap-3 rounded-xl px-3 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950"
+        >
+          <ChartNoAxesCombined className="size-[18px]" /> Relatórios
+        </a>
         <div className="mt-auto space-y-1">
           <button className="flex h-10 w-full items-center gap-3 rounded-xl px-3 text-sm font-medium text-zinc-500 hover:bg-zinc-100 hover:text-zinc-950"><Settings className="size-[18px]" /> Configurações</button>
           <div className="my-3 h-px bg-zinc-100" />
@@ -493,8 +500,9 @@ export default function Home() {
   const [requestedView, setRequestedView] = useState<View>("dashboard");
 
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("view") === "agendamentos") {
-      setRequestedView("agendamentos");
+    const view = new URLSearchParams(window.location.search).get("view");
+    if (view === "dashboard" || view === "agendamentos" || view === "usuarios") {
+      setRequestedView(view);
     }
   }, []);
 
