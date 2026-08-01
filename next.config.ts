@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  turbopack: {
+    root: process.cwd(),
+  },
+  async rewrites() {
+    return [
+      { source: "/free-access/links", destination: "/links" },
+      { source: "/free-access", destination: "/site" },
+    ];
+  },
 };
 
 export default nextConfig;
