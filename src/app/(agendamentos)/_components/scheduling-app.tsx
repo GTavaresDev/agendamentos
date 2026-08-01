@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
+import Link from "next/link";
 import {
   ArrowRight,
   Bell,
@@ -36,6 +37,7 @@ import {
 import { Input } from "@/app/(agendamentos)/_components/ui/input";
 import { cn } from "@/lib/utils";
 import {
+  appointmentChannels,
   appointments,
   occupied,
   times,
@@ -260,7 +262,10 @@ function Sidebar({
                   : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950",
               )}
             >
-              <Icon className="size-[18px]" /> {label}
+              <span className="flex size-[18px] shrink-0 items-center justify-center">
+                <Icon className="size-[18px] stroke-[1.75]" />
+              </span>
+              <span className="text-[14px] font-medium leading-5">{label}</span>
               {id === "agendamentos" && (
                 <span
                   className={cn(
@@ -276,15 +281,23 @@ function Sidebar({
             </button>
           ))}
         </nav>
-        <a
+        <Link
           href="/relatorios"
           className="mt-1 flex h-11 w-full items-center gap-3 rounded-xl px-3 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950"
         >
-          <ChartNoAxesCombined className="size-[18px]" /> Relatórios
-        </a>
+          <span className="flex size-[18px] shrink-0 items-center justify-center">
+            <ChartNoAxesCombined className="size-[18px] stroke-[1.75]" />
+          </span>
+          <span className="text-[14px] font-medium leading-5">Relatórios</span>
+        </Link>
         <div className="mt-auto space-y-1">
           <button className="flex h-10 w-full items-center gap-3 rounded-xl px-3 text-sm font-medium text-zinc-500 hover:bg-zinc-100 hover:text-zinc-950">
-            <Settings className="size-[18px]" /> Configurações
+            <span className="flex size-[18px] shrink-0 items-center justify-center">
+              <Settings className="size-[18px] stroke-[1.75]" />
+            </span>
+            <span className="text-[14px] font-medium leading-5">
+              Configurações
+            </span>
           </button>
           <div className="my-3 h-px bg-zinc-100" />
           <div className="flex items-center gap-3 rounded-xl p-2">
@@ -560,17 +573,21 @@ function Dashboard({ onNew }: { onNew: () => void }) {
 function Scheduling({ showToast }: { showToast: (message: string) => void }) {
   const [selectedDay, setSelectedDay] = useState(5);
   const [selectedTime, setSelectedTime] = useState("14:00");
+  const [selectedChannel, setSelectedChannel] = useState("recepcao");
   const [notes, setNotes] = useState("");
 
   function confirm() {
+    const channel = appointmentChannels.find(
+      (item) => item.id === selectedChannel,
+    );
     showToast(
-      `Agendamento criado para ${weekDays[selectedDay].date}/08 às ${selectedTime}`,
+      `Agendamento criado para ${weekDays[selectedDay].date}/08 às ${selectedTime} via ${channel?.name}`,
     );
   }
 
   return (
-    <div className="mx-auto max-w-[1500px] p-4 sm:p-6 lg:p-8">
-      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div className="mx-auto max-w-[1500px] p-4 md:p-5 xl:p-8">
+      <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-end md:justify-between xl:mb-6">
         <div>
           <h2 className="text-lg font-semibold tracking-tight text-zinc-950">
             Escolha uma data e horário
@@ -592,17 +609,17 @@ function Scheduling({ showToast }: { showToast: (message: string) => void }) {
         </div>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[1fr_380px]">
-        <div className="space-y-5">
+      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_clamp(260px,30%,380px)] xl:gap-5">
+        <div className="min-w-0 space-y-4 xl:space-y-5">
           <Card>
-            <CardContent className="p-3 sm:p-5">
-              <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+            <CardContent className="p-3 md:p-4 xl:p-5">
+              <div className="grid grid-cols-7 gap-1.5 xl:gap-2">
                 {weekDays.map((item, index) => (
                   <button
                     key={item.date}
                     onClick={() => setSelectedDay(index)}
                     className={cn(
-                      "flex min-h-20 flex-col items-center justify-center rounded-xl border px-1 transition sm:min-h-24",
+                      "flex min-h-16 flex-col items-center justify-center rounded-xl border px-1 transition md:min-h-20 xl:min-h-24",
                       selectedDay === index
                         ? "border-zinc-950 bg-zinc-950 text-white shadow-md"
                         : "border-transparent bg-zinc-50 text-zinc-500 hover:border-zinc-200 hover:bg-white",
@@ -610,7 +627,7 @@ function Scheduling({ showToast }: { showToast: (message: string) => void }) {
                   >
                     <span
                       className={cn(
-                        "text-[9px] font-semibold uppercase sm:text-[11px]",
+                        "text-[9px] font-semibold uppercase md:text-[10px] xl:text-[11px]",
                         selectedDay === index
                           ? "text-zinc-400"
                           : "text-zinc-400",
@@ -618,7 +635,7 @@ function Scheduling({ showToast }: { showToast: (message: string) => void }) {
                     >
                       {item.day}
                     </span>
-                    <span className="mt-1 text-lg font-semibold sm:text-xl">
+                    <span className="mt-1 text-lg font-semibold xl:text-xl">
                       {item.date}
                     </span>
                     {index === 5 && (
@@ -636,14 +653,14 @@ function Scheduling({ showToast }: { showToast: (message: string) => void }) {
           </Card>
 
           <Card>
-            <CardHeader className="flex-row items-center justify-between">
+            <CardHeader className="flex-row items-center justify-between p-4 xl:p-5">
               <div>
                 <CardTitle>Horários disponíveis</CardTitle>
                 <CardDescription>
                   {weekDays[selectedDay].full} · 30 min por horário
                 </CardDescription>
               </div>
-              <div className="hidden items-center gap-3 text-[10px] text-zinc-400 sm:flex">
+              <div className="hidden items-center gap-2 text-[9px] text-zinc-400 md:flex xl:gap-3 xl:text-[10px]">
                 <span className="flex items-center gap-1.5">
                   <i className="size-2 rounded-full bg-zinc-950" /> Selecionado
                 </span>
@@ -652,13 +669,13 @@ function Scheduling({ showToast }: { showToast: (message: string) => void }) {
                 </span>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 pt-0 xl:p-5 xl:pt-0">
               <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
                 <span className="h-px flex-1 bg-zinc-100" />
                 <span>Manhã</span>
                 <span className="h-px flex-1 bg-zinc-100" />
               </div>
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
+              <div className="grid grid-cols-3 gap-2 md:grid-cols-6">
                 {times.slice(0, 8).map((time) => (
                   <TimeButton
                     key={time}
@@ -674,7 +691,7 @@ function Scheduling({ showToast }: { showToast: (message: string) => void }) {
                 <span>Tarde</span>
                 <span className="h-px flex-1 bg-zinc-100" />
               </div>
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
+              <div className="grid grid-cols-3 gap-2 md:grid-cols-6">
                 {times.slice(8).map((time) => (
                   <TimeButton
                     key={time}
@@ -689,15 +706,15 @@ function Scheduling({ showToast }: { showToast: (message: string) => void }) {
           </Card>
         </div>
 
-        <Card className="h-fit xl:sticky xl:top-[108px]">
-          <CardHeader className="border-b border-zinc-100">
+        <Card className="h-fit min-w-0 md:sticky md:top-[104px] xl:top-[108px]">
+          <CardHeader className="border-b border-zinc-100 p-4 xl:p-5">
             <div className="mb-2 flex size-10 items-center justify-center rounded-xl bg-zinc-950 text-white">
               <CalendarDays className="size-5" />
             </div>
             <CardTitle>Detalhes do agendamento</CardTitle>
             <CardDescription>Preencha os dados do atendimento.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 pt-5">
+          <CardContent className="space-y-4 p-4 pt-4 xl:p-5 xl:pt-5">
             <div>
               <FieldLabel>Cliente</FieldLabel>
               <div className="relative">
@@ -721,6 +738,26 @@ function Scheduling({ showToast }: { showToast: (message: string) => void }) {
                 </select>
                 <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
               </div>
+            </div>
+            <div>
+              <FieldLabel>Canal de atendimento</FieldLabel>
+              <div className="relative">
+                <select
+                  value={selectedChannel}
+                  onChange={(event) => setSelectedChannel(event.target.value)}
+                  className="h-11 w-full appearance-none rounded-lg border border-zinc-200 bg-white px-3 pr-9 text-sm outline-none focus:border-zinc-400"
+                >
+                  {appointmentChannels.map((channel) => (
+                    <option key={channel.id} value={channel.id}>
+                      {channel.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
+              </div>
+              <p className="mt-1.5 text-[11px] leading-4 text-zinc-400">
+                Esta origem será contabilizada em Relatórios.
+              </p>
             </div>
             <div>
               <FieldLabel>Observações</FieldLabel>

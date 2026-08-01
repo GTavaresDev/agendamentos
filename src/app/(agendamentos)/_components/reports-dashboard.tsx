@@ -29,6 +29,7 @@ import {
   Clock3,
   Download,
   LayoutDashboard,
+  LogOut,
   Menu,
   MoreHorizontal,
   Settings,
@@ -49,6 +50,17 @@ import {
   CardTitle,
 } from "@/app/(agendamentos)/_components/ui/card";
 import { cn } from "@/lib/utils";
+import { appointmentChannels } from "@/app/mocks/scheduling";
+
+const digitalChannels = appointmentChannels.filter((channel) => channel.digital);
+const digitalChannelTotal = digitalChannels.reduce(
+  (total, channel) => total + channel.value,
+  0,
+);
+const digitalChannelPercent = digitalChannels.reduce(
+  (total, channel) => total + channel.percent,
+  0,
+);
 
 const monthly = [
   { month: "Fev", agendamentos: 214, cancelados: 19, receita: 29100 },
@@ -209,7 +221,7 @@ function ReportSidebar({
       )}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-[256px] flex-col border-r border-zinc-200 bg-white p-4 transition-transform lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 flex w-[256px] flex-col border-r border-zinc-200 bg-white p-4 transition-transform duration-300 lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
@@ -229,43 +241,64 @@ function ReportSidebar({
             <X />
           </Button>
         </div>
-        <p className="mt-8 px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
+        <div className="mt-8 px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
           Menu principal
-        </p>
+        </div>
         <nav className="mt-3 space-y-1">
           {items.map(({ label, icon: Icon, href, active }) => (
             <Link
               key={label}
               href={href}
               className={cn(
-                "flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium transition",
+                "flex h-11 w-full items-center gap-3 rounded-xl px-3 text-sm font-medium transition",
                 active
                   ? "bg-zinc-950 text-white shadow-sm"
                   : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950",
               )}
             >
-              <Icon className="size-[18px]" />
-              {label}
+              <span className="flex size-[18px] shrink-0 items-center justify-center">
+                <Icon className="size-[18px] stroke-[1.75]" />
+              </span>
+              <span className="text-[14px] font-medium leading-5">{label}</span>
+              {label === "Agendamentos" && (
+                <span className="ml-auto rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] text-zinc-500">
+                  5
+                </span>
+              )}
             </Link>
           ))}
         </nav>
-        <div className="mt-auto">
+        <div className="mt-auto space-y-1">
           <Link
             href="/"
-            className="mb-3 flex h-10 items-center gap-3 rounded-xl px-3 text-sm font-medium text-zinc-500 hover:bg-zinc-100"
+            className="flex h-10 w-full items-center gap-3 rounded-xl px-3 text-sm font-medium text-zinc-500 hover:bg-zinc-100 hover:text-zinc-950"
           >
-            <Settings className="size-[18px]" /> Configurações
+            <span className="flex size-[18px] shrink-0 items-center justify-center">
+              <Settings className="size-[18px] stroke-[1.75]" />
+            </span>
+            <span className="text-[14px] font-medium leading-5">
+              Configurações
+            </span>
           </Link>
-          <div className="h-px bg-zinc-100" />
-          <div className="mt-3 flex items-center gap-3 p-2">
+          <div className="my-3 h-px bg-zinc-100" />
+          <div className="flex items-center gap-3 rounded-xl p-2">
             <Avatar
               initials="AS"
               className="size-10 bg-zinc-950 text-white ring-0"
             />
-            <div>
-              <p className="text-sm font-semibold">Ana Souza</p>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-zinc-900">
+                Ana Souza
+              </p>
               <p className="text-xs text-zinc-400">Administrador</p>
             </div>
+            <Link
+              href="/"
+              title="Sair"
+              className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-950"
+            >
+              <LogOut className="size-4" />
+            </Link>
           </div>
         </div>
       </aside>
@@ -391,21 +424,25 @@ export function ReportsDashboard() {
             <Menu />
           </Button>
           <div className="min-w-0 flex-1">
-            <h1 className="truncate text-xl font-semibold tracking-[-0.02em] sm:text-2xl">
+            <h1 className="truncate text-xl font-semibold tracking-[-0.02em] text-zinc-950 sm:text-2xl">
               Relatórios
             </h1>
-            <p className="hidden text-sm text-zinc-500 sm:block">
+            <p className="hidden truncate text-sm text-zinc-500 sm:block">
               Dados consolidados para acompanhar a operação.
             </p>
           </div>
-          <button className="relative flex size-10 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-600">
+          <button className="relative flex size-10 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50">
             <Bell className="size-[18px]" />
             <span className="absolute right-2 top-2 size-1.5 rounded-full bg-black ring-2 ring-white" />
           </button>
-          <Avatar
-            initials="AS"
-            className="hidden size-9 bg-zinc-950 text-white ring-0 sm:inline-flex"
-          />
+          <div className="hidden h-8 w-px bg-zinc-200 sm:block" />
+          <div className="hidden items-center gap-2 sm:flex">
+            <Avatar
+              initials="AS"
+              className="size-9 bg-zinc-950 text-white ring-0"
+            />
+            <ChevronDown className="size-4 text-zinc-400" />
+          </div>
         </header>
 
         <main className="mx-auto max-w-[1560px] p-4 sm:p-6 lg:p-8">
@@ -756,12 +793,7 @@ export function ReportsDashboard() {
                 description="Canais usados pelos clientes"
               />
               <CardContent className="space-y-6">
-                {[
-                  { name: "Site / link público", value: 142, percent: 42 },
-                  { name: "WhatsApp", value: 103, percent: 30 },
-                  { name: "Recepção", value: 68, percent: 20 },
-                  { name: "Instagram", value: 29, percent: 8 },
-                ].map((channel) => (
+                {appointmentChannels.map((channel) => (
                   <div key={channel.name}>
                     <div className="mb-2 flex items-center justify-between text-sm">
                       <span className="font-medium text-zinc-700">
@@ -784,9 +816,10 @@ export function ReportsDashboard() {
                 ))}
                 <div className="rounded-xl bg-zinc-50 p-4 text-xs leading-5 text-zinc-500">
                   <strong className="block text-sm text-zinc-900">
-                    72% chegam por canais digitais
+                    {digitalChannelPercent}% chegam por canais digitais
                   </strong>
-                  Site e WhatsApp são responsáveis por 245 agendamentos.
+                  Canais digitais são responsáveis por {digitalChannelTotal}{" "}
+                  agendamentos.
                 </div>
               </CardContent>
             </Card>

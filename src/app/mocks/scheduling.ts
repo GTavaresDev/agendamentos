@@ -1,10 +1,17 @@
 export const appointments = [
-  { time: "09:00", name: "Marina Costa", service: "Consulta inicial", duration: "45 min", status: "Confirmado", initials: "MC" },
-  { time: "10:30", name: "Rafael Alves", service: "Retorno", duration: "30 min", status: "Confirmado", initials: "RA" },
-  { time: "13:00", name: "Beatriz Lima", service: "Avaliação", duration: "60 min", status: "Pendente", initials: "BL" },
-  { time: "15:30", name: "Lucas Mendes", service: "Consulta inicial", duration: "45 min", status: "Confirmado", initials: "LM" },
-  { time: "17:00", name: "Camila Rocha", service: "Retorno", duration: "30 min", status: "Pendente", initials: "CR" },
+  { time: "09:00", name: "Marina Costa", service: "Consulta inicial", duration: "45 min", status: "Confirmado", initials: "MC", channelId: "site" },
+  { time: "10:30", name: "Rafael Alves", service: "Retorno", duration: "30 min", status: "Confirmado", initials: "RA", channelId: "whatsapp" },
+  { time: "13:00", name: "Beatriz Lima", service: "Avaliação", duration: "60 min", status: "Pendente", initials: "BL", channelId: "instagram" },
+  { time: "15:30", name: "Lucas Mendes", service: "Consulta inicial", duration: "45 min", status: "Confirmado", initials: "LM", channelId: "recepcao" },
+  { time: "17:00", name: "Camila Rocha", service: "Retorno", duration: "30 min", status: "Pendente", initials: "CR", channelId: "whatsapp" },
 ];
+
+export const appointmentChannels = [
+  { id: "site", name: "Sistema", value: 142, percent: 42, digital: true },
+  { id: "whatsapp", name: "WhatsApp", value: 103, percent: 30, digital: true },
+  { id: "recepcao", name: "Recepção", value: 68, percent: 20, digital: false },
+  { id: "instagram", name: "Instagram", value: 29, percent: 8, digital: true },
+] as const;
 
 export const users = [
   { name: "Marina Costa", email: "marina.costa@email.com", phone: "(11) 99842-3210", role: "Cliente", status: "Ativo", last: "Hoje, 09:00", initials: "MC" },
