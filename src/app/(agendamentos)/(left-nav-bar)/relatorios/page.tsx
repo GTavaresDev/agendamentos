@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ReportsDashboard } from "@/app/(agendamentos)/_components/reports-dashboard";
 
 export const metadata: Metadata = {
-  title: "Relatórios — Atempo",
+  title: "Relatórios — Cliente",
   description: "Indicadores e análises dos agendamentos.",
 };
 

@@ -2,9 +2,10 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowRight,
-  Bell,
+  CalendarClock,
   CalendarDays,
   Check,
   ChevronDown,
@@ -17,6 +18,7 @@ import {
   LogOut,
   Menu,
   MoreHorizontal,
+  Package,
   Plus,
   Search,
   Settings,
@@ -35,17 +37,22 @@ import {
   CardTitle,
 } from "@/app/(agendamentos)/_components/ui/card";
 import { Input } from "@/app/(agendamentos)/_components/ui/input";
+import { BrandLogo } from "@/app/(agendamentos)/_components/brand-logo";
+import { useAppData } from "@/app/(agendamentos)/_components/app-data-provider";
 import { cn } from "@/lib/utils";
 import {
   appointmentChannels,
-  appointments,
-  occupied,
+  services,
   times,
-  users,
   weekDays,
 } from "@/app/mocks/scheduling";
 
-export type View = "dashboard" | "agendamentos" | "usuarios";
+export type View =
+  | "dashboard"
+  | "agenda"
+  | "agendamentos"
+  | "usuarios"
+  | "produtos";
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -55,9 +62,17 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
+function formatCurrency(value: number) {
+  return value.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+}
+
 function Login({ onLogin }: { onLogin: () => void }) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loginNotice, setLoginNotice] = useState("");
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -71,13 +86,8 @@ function Login({ onLogin }: { onLogin: () => void }) {
         <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,255,255,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.08)_1px,transparent_1px)] [background-size:48px_48px]" />
         <div className="absolute -right-32 top-36 size-96 rounded-full border border-white/10" />
         <div className="absolute -right-16 top-52 size-64 rounded-full border border-white/10" />
-        <div className="relative flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-white text-zinc-950">
-            <CalendarDays className="size-5" />
-          </div>
-          <span className="text-lg font-semibold tracking-tight">Atempo</span>
-        </div>
-        <div className="relative max-w-xl">
+        <BrandLogo inverse large className="relative" />
+        <div className="absolute left-12 top-1/2 -mt-20 w-[calc(100%-6rem)] max-w-xl -translate-y-1/2">
           <Badge
             className="mb-6 border-white/15 bg-white/10 text-white"
             variant="outline"
@@ -102,18 +112,13 @@ function Login({ onLogin }: { onLogin: () => void }) {
               />
             ))}
           </div>
-          <span>Mais de 1.200 horários organizados este mês</span>
+          <span>Organizando o caos da rotina de agendamentos</span>
         </div>
       </section>
 
       <section className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 py-10 sm:px-10">
         <div className="w-full max-w-[430px]">
-          <div className="mb-10 flex items-center gap-3 lg:hidden">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-black text-white">
-              <CalendarDays className="size-5" />
-            </div>
-            <span className="text-lg font-semibold tracking-tight">Atempo</span>
-          </div>
+          <BrandLogo large className="mb-10 lg:hidden" />
           <div className="mb-8">
             <p className="mb-3 text-sm font-medium text-zinc-500">
               Bem-vindo de volta
@@ -130,7 +135,7 @@ function Login({ onLogin }: { onLogin: () => void }) {
               <FieldLabel>E-mail</FieldLabel>
               <Input
                 type="email"
-                defaultValue="admin@atempo.com"
+                defaultValue="admin@cliente.com"
                 aria-label="E-mail"
               />
             </div>
@@ -141,6 +146,11 @@ function Login({ onLogin }: { onLogin: () => void }) {
                 </label>
                 <button
                   type="button"
+                  onClick={() =>
+                    setLoginNotice(
+                      "Enviamos as instruções de recuperação para o e-mail informado.",
+                    )
+                  }
                   className="text-xs font-medium text-zinc-500 hover:text-black"
                 >
                   Esqueceu a senha?
@@ -162,6 +172,11 @@ function Login({ onLogin }: { onLogin: () => void }) {
                 </button>
               </div>
             </div>
+            {loginNotice && (
+              <p role="status" className="rounded-lg bg-zinc-100 p-3 text-xs text-zinc-600">
+                {loginNotice}
+              </p>
+            )}
             <label className="flex cursor-pointer items-center gap-2 text-sm text-zinc-600">
               <input
                 type="checkbox"
@@ -181,12 +196,15 @@ function Login({ onLogin }: { onLogin: () => void }) {
           </form>
           <p className="mt-8 text-center text-sm text-zinc-500">
             Não tem uma conta?{" "}
-            <button className="font-semibold text-zinc-950 hover:underline">
+            <a
+              href="mailto:contato@cliente.com"
+              className="font-semibold text-zinc-950 hover:underline"
+            >
               Fale com a gente
-            </button>
+            </a>
           </p>
           <p className="mt-16 text-center text-xs text-zinc-400">
-            © 2026 Atempo. Todos os direitos reservados.
+            © 2026 Cliente. Todos os direitos reservados.
           </p>
         </div>
       </section>
@@ -200,17 +218,46 @@ function Sidebar({
   onLogout,
   mobileOpen,
   setMobileOpen,
+  showToast,
 }: {
   view: View;
   setView: (view: View) => void;
   onLogout: () => void;
   mobileOpen: boolean;
   setMobileOpen: (open: boolean) => void;
+  showToast: (message: string) => void;
 }) {
   const nav = [
-    { id: "dashboard" as View, label: "Início", icon: LayoutDashboard },
-    { id: "agendamentos" as View, label: "Agendamentos", icon: CalendarDays },
-    { id: "usuarios" as View, label: "Usuários", icon: UsersRound },
+    {
+      id: "dashboard" as View,
+      label: "Início",
+      icon: LayoutDashboard,
+      href: "/dashboard",
+    },
+    {
+      id: "agenda" as View,
+      label: "Agenda",
+      icon: CalendarClock,
+      href: "/agenda",
+    },
+    {
+      id: "agendamentos" as View,
+      label: "Agendamentos",
+      icon: CalendarDays,
+      href: "/agendamentos",
+    },
+    {
+      id: "usuarios" as View,
+      label: "Usuários",
+      icon: UsersRound,
+      href: "/usuarios",
+    },
+    {
+      id: "produtos" as View,
+      label: "Produtos",
+      icon: Package,
+      href: "/produtos",
+    },
   ];
 
   return (
@@ -228,29 +275,27 @@ function Sidebar({
           mobileOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="flex h-14 items-center justify-between px-2">
-          <div className="flex items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-black text-white">
-              <CalendarDays className="size-[18px]" />
-            </div>
-            <span className="font-semibold tracking-tight">Atempo</span>
-          </div>
+        <div className="relative flex h-20 items-center justify-center px-2">
+          <Link href="/dashboard" aria-label="Ir para o início">
+            <BrandLogo />
+          </Link>
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden"
+            className="absolute right-2 lg:hidden"
             onClick={() => setMobileOpen(false)}
           >
             <X />
           </Button>
         </div>
-        <div className="mt-8 px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
+        <div className="mt-3 px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
           Menu principal
         </div>
         <nav className="mt-3 space-y-1">
-          {nav.map(({ id, label, icon: Icon }) => (
-            <button
+          {nav.map(({ id, label, icon: Icon, href }) => (
+            <Link
               key={id}
+              href={href}
               onClick={() => {
                 setView(id);
                 setMobileOpen(false);
@@ -266,19 +311,7 @@ function Sidebar({
                 <Icon className="size-[18px] stroke-[1.75]" />
               </span>
               <span className="text-[14px] font-medium leading-5">{label}</span>
-              {id === "agendamentos" && (
-                <span
-                  className={cn(
-                    "ml-auto rounded-full px-2 py-0.5 text-[10px]",
-                    view === id
-                      ? "bg-white/15 text-white"
-                      : "bg-zinc-100 text-zinc-500",
-                  )}
-                >
-                  5
-                </span>
-              )}
-            </button>
+            </Link>
           ))}
         </nav>
         <Link
@@ -291,7 +324,10 @@ function Sidebar({
           <span className="text-[14px] font-medium leading-5">Relatórios</span>
         </Link>
         <div className="mt-auto space-y-1">
-          <button className="flex h-10 w-full items-center gap-3 rounded-xl px-3 text-sm font-medium text-zinc-500 hover:bg-zinc-100 hover:text-zinc-950">
+          <button
+            onClick={() => showToast("As configurações serão abertas nesta área.")}
+            className="flex h-10 w-full items-center gap-3 rounded-xl px-3 text-sm font-medium text-zinc-500 hover:bg-zinc-100 hover:text-zinc-950"
+          >
             <span className="flex size-[18px] shrink-0 items-center justify-center">
               <Settings className="size-[18px] stroke-[1.75]" />
             </span>
@@ -352,18 +388,6 @@ function Topbar({
           {subtitle}
         </p>
       </div>
-      <button className="relative flex size-10 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50">
-        <Bell className="size-[18px]" />
-        <span className="absolute right-2 top-2 size-1.5 rounded-full bg-black ring-2 ring-white" />
-      </button>
-      <div className="hidden h-8 w-px bg-zinc-200 sm:block" />
-      <div className="hidden items-center gap-2 sm:flex">
-        <Avatar
-          initials="AS"
-          className="size-9 bg-zinc-950 text-white ring-0"
-        />
-        <ChevronDown className="size-4 text-zinc-400" />
-      </div>
     </header>
   );
 }
@@ -374,12 +398,14 @@ function StatCard({
   detail,
   icon: Icon,
   progress,
+  trend,
 }: {
   label: string;
   value: string;
   detail: string;
   icon: typeof CalendarDays;
   progress?: number;
+  trend?: string;
 }) {
   return (
     <Card className="overflow-hidden">
@@ -388,9 +414,11 @@ function StatCard({
           <div className="flex size-10 items-center justify-center rounded-xl bg-zinc-100 text-zinc-700">
             <Icon className="size-5" />
           </div>
-          <Badge variant="secondary" className="font-medium">
-            +12% <span className="ml-1 text-zinc-400">este mês</span>
-          </Badge>
+          {trend && (
+            <Badge variant="secondary" className="font-medium">
+              {trend}
+            </Badge>
+          )}
         </div>
         <p className="text-sm font-medium text-zinc-500">{label}</p>
         <div className="mt-1 flex items-end justify-between gap-3">
@@ -412,8 +440,53 @@ function StatCard({
   );
 }
 
-function Dashboard({ onNew }: { onNew: () => void }) {
-  const bars = [52, 68, 46, 82, 71, 92, 64];
+function Dashboard({
+  onNew,
+  onViewAgenda,
+  showToast,
+}: {
+  onNew: () => void;
+  onViewAgenda: () => void;
+  showToast: (message: string) => void;
+}) {
+  const { appointments, users, updateAppointmentStatus } = useAppData();
+  const todayAppointments = useMemo(
+    () =>
+      appointments
+        .filter((appointment) => appointment.date === "2026-08-01")
+        .sort((a, b) => a.time.localeCompare(b.time)),
+    [appointments],
+  );
+  const activeUsers = users.filter((user) => user.status === "Ativo").length;
+  const validAppointments = appointments.filter(
+    (appointment) => appointment.status !== "Cancelado",
+  );
+  const completedAppointments = appointments.filter(
+    (appointment) => appointment.status === "Concluído",
+  );
+  const presenceRate = validAppointments.length
+    ? Math.round((completedAppointments.length / validAppointments.length) * 100)
+    : 0;
+  const occupiedMinutes = todayAppointments
+    .filter((appointment) => appointment.status !== "Cancelado")
+    .reduce((total, appointment) => total + appointment.durationMinutes, 0);
+  const occupiedLabel = `${Math.floor(occupiedMinutes / 60)}h${String(occupiedMinutes % 60).padStart(2, "0")}`;
+  const julyTotal = appointments.filter((item) => item.date.startsWith("2026-07")).length;
+  const juneTotal = appointments.filter((item) => item.date.startsWith("2026-06")).length;
+  const growth = juneTotal
+    ? Math.round(((julyTotal - juneTotal) / juneTotal) * 100)
+    : 0;
+  const weeklyTotals = weekDays.map(
+    (day) => appointments.filter((appointment) => appointment.date === day.iso).length,
+  );
+  const weeklyMax = Math.max(...weeklyTotals, 1);
+  const bars = weeklyTotals.map((total) => Math.max(8, (total / weeklyMax) * 100));
+  const otherDaysAverage =
+    weeklyTotals.filter((_, index) => index !== 5).reduce((sum, value) => sum + value, 0) /
+    6;
+  const saturdayDifference = otherDaysAverage
+    ? Math.round(((weeklyTotals[5] - otherDaysAverage) / otherDaysAverage) * 100)
+    : 0;
   return (
     <div className="mx-auto max-w-[1500px] p-4 sm:p-6 lg:p-8">
       <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -422,7 +495,7 @@ function Dashboard({ onNew }: { onNew: () => void }) {
             Sábado, 1 de agosto
           </p>
           <p className="mt-1 text-sm text-zinc-500">
-            Você tem 5 compromissos para hoje.
+            Você tem {todayAppointments.length} compromissos para hoje.
           </p>
         </div>
         <Button onClick={onNew}>
@@ -433,30 +506,34 @@ function Dashboard({ onNew }: { onNew: () => void }) {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Agendamentos hoje"
-          value="05"
-          detail="de 8 horários"
+          value={String(todayAppointments.length).padStart(2, "0")}
+          detail={`de ${times.length} horários`}
           icon={CalendarDays}
-          progress={63}
+          progress={(todayAppointments.length / times.length) * 100}
+          trend={`${growth >= 0 ? "+" : ""}${growth}% vs. mês anterior`}
         />
         <StatCard
           label="Clientes ativos"
-          value="248"
-          detail="28 novos"
+          value={String(activeUsers)}
+          detail={`${users.length} cadastrados`}
           icon={UsersRound}
+          trend="base atual"
         />
         <StatCard
           label="Taxa de presença"
-          value="92%"
+          value={`${presenceRate}%`}
           detail="últimos 30 dias"
           icon={Check}
-          progress={92}
+          progress={presenceRate}
+          trend={`${completedAppointments.length} concluídos`}
         />
         <StatCard
           label="Tempo ocupado"
-          value="3h30"
+          value={occupiedLabel}
           detail="hoje"
           icon={Clock3}
-          progress={54}
+          progress={(occupiedMinutes / (times.length * 30)) * 100}
+          trend={`${todayAppointments.length} atendimentos`}
         />
       </div>
 
@@ -469,13 +546,13 @@ function Dashboard({ onNew }: { onNew: () => void }) {
                 Próximos atendimentos confirmados
               </CardDescription>
             </div>
-            <Button variant="outline" size="sm" onClick={onNew}>
+            <Button variant="outline" size="sm" onClick={onViewAgenda}>
               Ver agenda <ArrowRight />
             </Button>
           </CardHeader>
           <CardContent className="px-0 pb-2">
             <div className="divide-y divide-zinc-100">
-              {appointments.slice(0, 4).map((item, index) => (
+              {todayAppointments.slice(0, 4).map((item, index) => (
                 <div
                   key={item.time}
                   className="group flex items-center gap-4 px-5 py-3.5 hover:bg-zinc-50"
@@ -506,7 +583,16 @@ function Dashboard({ onNew }: { onNew: () => void }) {
                   >
                     {item.status}
                   </Badge>
-                  <button className="rounded-lg p-2 text-zinc-400 opacity-0 hover:bg-zinc-100 group-hover:opacity-100">
+                  <button
+                    title="Alternar status do atendimento"
+                    onClick={() => {
+                      const nextStatus =
+                        item.status === "Concluído" ? "Confirmado" : "Concluído";
+                      updateAppointmentStatus(item.id, nextStatus);
+                      showToast(`Atendimento de ${item.name}: ${nextStatus}`);
+                    }}
+                    className="rounded-lg p-2 text-zinc-400 opacity-0 hover:bg-zinc-100 group-hover:opacity-100"
+                  >
                     <MoreHorizontal className="size-4" />
                   </button>
                 </div>
@@ -536,7 +622,7 @@ function Dashboard({ onNew }: { onNew: () => void }) {
                   >
                     {index === 5 && (
                       <span className="absolute -top-7 left-1/2 -translate-x-1/2 rounded bg-black px-1.5 py-0.5 text-[9px] font-semibold text-white">
-                        12
+                        {weeklyTotals[index]}
                       </span>
                     )}
                   </div>
@@ -558,7 +644,7 @@ function Dashboard({ onNew }: { onNew: () => void }) {
               </div>
               <p className="text-xs leading-5 text-zinc-500">
                 <strong className="block text-sm text-zinc-900">
-                  Seu sábado está 18% mais cheio
+                  Seu sábado está {Math.abs(saturdayDifference)}% {saturdayDifference >= 0 ? "mais cheio" : "mais livre"}
                 </strong>
                 comparado à média das últimas semanas.
               </p>
@@ -570,19 +656,280 @@ function Dashboard({ onNew }: { onNew: () => void }) {
   );
 }
 
+function Agenda({ showToast }: { showToast: (message: string) => void }) {
+  const { appointments, updateAppointmentStatus } = useAppData();
+  const [selectedDay, setSelectedDay] = useState(5);
+  const selectedDayInfo = weekDays[selectedDay];
+  const dayAppointments = useMemo(
+    () =>
+      appointments
+        .filter((appointment) => appointment.date === selectedDayInfo.iso)
+        .sort((a, b) => a.time.localeCompare(b.time)),
+    [appointments, selectedDayInfo.iso],
+  );
+  const confirmedCount = dayAppointments.filter(
+    (appointment) => appointment.status === "Confirmado",
+  ).length;
+  const pendingCount = dayAppointments.filter(
+    (appointment) => appointment.status === "Pendente",
+  ).length;
+  const isToday = selectedDayInfo.iso === "2026-08-01";
+  let dayTitle = `Agenda de ${selectedDayInfo.full}`;
+
+  if (isToday) {
+    dayTitle = "Agenda de hoje";
+  }
+
+  let emptyMessage = "Nenhum atendimento neste dia.";
+
+  if (isToday) {
+    emptyMessage = "Nenhum atendimento para hoje.";
+  }
+
+  let description = `${dayAppointments.length} atendimento`;
+
+  if (dayAppointments.length !== 1) {
+    description = `${dayAppointments.length} atendimentos`;
+  }
+
+  return (
+    <div className="mx-auto max-w-[1500px] p-4 sm:p-6 lg:p-8">
+      <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <p className="text-sm font-medium text-zinc-950">{dayTitle}</p>
+          <p className="mt-1 text-sm text-zinc-500">
+            Selecione um dia da semana para ver os horários.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2 text-xs text-zinc-500">
+          <span className="rounded-lg bg-white px-3 py-1.5 ring-1 ring-zinc-200">
+            {description}
+          </span>
+          <span className="rounded-lg bg-emerald-50 px-3 py-1.5 text-emerald-700 ring-1 ring-emerald-600/10">
+            {confirmedCount} confirmados
+          </span>
+          <span className="rounded-lg bg-amber-50 px-3 py-1.5 text-amber-700 ring-1 ring-amber-600/10">
+            {pendingCount} pendentes
+          </span>
+        </div>
+      </div>
+
+      <div className="mb-4 grid grid-cols-7 gap-1.5 sm:gap-2">
+        {weekDays.map((item, index) => {
+          const count = appointments.filter(
+            (appointment) => appointment.date === item.iso,
+          ).length;
+          const isSelected = selectedDay === index;
+          let dayButtonClass =
+            "flex min-h-16 flex-col items-center justify-center rounded-xl border px-1 transition sm:min-h-20";
+          let dayLabelClass = "text-[9px] font-semibold uppercase sm:text-[10px]";
+          let countClass = "mt-0.5 text-[10px] font-medium";
+
+          if (isSelected) {
+            dayButtonClass = `${dayButtonClass} border-zinc-950 bg-zinc-950 text-white shadow-md`;
+            dayLabelClass = `${dayLabelClass} text-zinc-400`;
+            countClass = `${countClass} text-zinc-400`;
+          } else {
+            dayButtonClass = `${dayButtonClass} border-transparent bg-white text-zinc-500 hover:border-zinc-200 hover:bg-zinc-50`;
+            dayLabelClass = `${dayLabelClass} text-zinc-400`;
+            countClass = `${countClass} text-zinc-400`;
+          }
+
+          return (
+            <button
+              key={item.iso}
+              type="button"
+              onClick={() => setSelectedDay(index)}
+              className={dayButtonClass}
+            >
+              <span className={dayLabelClass}>{item.day}</span>
+              <span className="mt-1 text-lg font-semibold sm:text-xl">
+                {item.date}
+              </span>
+              <span className={countClass}>{count}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <Card>
+        <CardHeader className="flex-row items-center justify-between">
+          <div>
+            <CardTitle>{dayTitle}</CardTitle>
+            <CardDescription>
+              Todos os atendimentos de {selectedDayInfo.full}
+            </CardDescription>
+          </div>
+          <Badge variant="outline">{description}</Badge>
+        </CardHeader>
+        <CardContent className="px-0 pb-2">
+          {dayAppointments.length === 0 && (
+            <div className="px-5 py-12 text-center">
+              <p className="text-sm font-medium text-zinc-900">{emptyMessage}</p>
+              <p className="mt-1 text-xs text-zinc-400">
+                Escolha outro dia ou crie um novo agendamento.
+              </p>
+            </div>
+          )}
+          {dayAppointments.length > 0 && (
+            <div className="divide-y divide-zinc-100">
+              {dayAppointments.map((item, index) => {
+                let badgeVariant: "success" | "warning" | "destructive" | "secondary" =
+                  "secondary";
+
+                if (item.status === "Confirmado") {
+                  badgeVariant = "success";
+                } else if (item.status === "Pendente") {
+                  badgeVariant = "warning";
+                } else if (
+                  item.status === "Cancelado" ||
+                  item.status === "Não compareceu"
+                ) {
+                  badgeVariant = "destructive";
+                }
+
+                let timelineClass = "h-9 w-0.5 rounded-full bg-zinc-200";
+
+                if (index < 2) {
+                  timelineClass = "h-9 w-0.5 rounded-full bg-zinc-950";
+                }
+
+                return (
+                  <div
+                    key={item.id}
+                    className="group flex items-center gap-4 px-5 py-3.5 hover:bg-zinc-50"
+                  >
+                    <div className="w-12 text-sm font-semibold text-zinc-950">
+                      {item.time}
+                    </div>
+                    <div className={timelineClass} />
+                    <Avatar initials={item.initials} />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-zinc-900">
+                        {item.name}
+                      </p>
+                      <p className="truncate text-xs text-zinc-400">
+                        {item.service} · {item.duration} · {item.professional}
+                      </p>
+                    </div>
+                    <Badge
+                      variant={badgeVariant}
+                      className="hidden sm:inline-flex"
+                    >
+                      {item.status}
+                    </Badge>
+                    <button
+                      title="Alternar status do atendimento"
+                      onClick={() => {
+                        let nextStatus: "Confirmado" | "Concluído" = "Concluído";
+
+                        if (item.status === "Concluído") {
+                          nextStatus = "Confirmado";
+                        }
+
+                        updateAppointmentStatus(item.id, nextStatus);
+                        showToast(
+                          `Atendimento de ${item.name}: ${nextStatus}`,
+                        );
+                      }}
+                      className="rounded-lg p-2 text-zinc-400 opacity-0 hover:bg-zinc-100 group-hover:opacity-100"
+                    >
+                      <MoreHorizontal className="size-4" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 function Scheduling({ showToast }: { showToast: (message: string) => void }) {
+  const { appointments, users, addAppointment } = useAppData();
   const [selectedDay, setSelectedDay] = useState(5);
   const [selectedTime, setSelectedTime] = useState("14:00");
+  const [selectedUserId, setSelectedUserId] = useState("user-marina");
+  const [selectedService, setSelectedService] = useState<string>(services[0].name);
   const [selectedChannel, setSelectedChannel] = useState("recepcao");
   const [notes, setNotes] = useState("");
+  const [weekOffset, setWeekOffset] = useState(0);
+  const displayedDays = useMemo(() => {
+    const baseDate = new Date(`${weekDays[0].iso}T12:00:00`);
+    return weekDays.map((_, index) => {
+      const date = new Date(baseDate);
+      date.setDate(baseDate.getDate() + index + weekOffset * 7);
+      return {
+        day: new Intl.DateTimeFormat("pt-BR", { weekday: "short" })
+          .format(date)
+          .replace(".", ""),
+        date: String(date.getDate()).padStart(2, "0"),
+        full: new Intl.DateTimeFormat("pt-BR", {
+          day: "numeric",
+          month: "long",
+        }).format(date),
+        iso: date.toISOString().slice(0, 10),
+      };
+    });
+  }, [weekOffset]);
+  const periodLabel = useMemo(() => {
+    const first = new Date(`${displayedDays[0].iso}T12:00:00`);
+    const last = new Date(`${displayedDays[6].iso}T12:00:00`);
+    const firstMonth = new Intl.DateTimeFormat("pt-BR", { month: "long" }).format(first);
+    const lastMonth = new Intl.DateTimeFormat("pt-BR", {
+      month: "long",
+      year: "numeric",
+    }).format(last);
+    return first.getMonth() === last.getMonth()
+      ? lastMonth
+      : `${firstMonth} — ${lastMonth}`;
+  }, [displayedDays]);
+  const occupiedTimes = useMemo(
+    () =>
+      appointments
+        .filter(
+          (appointment) =>
+            appointment.date === displayedDays[selectedDay].iso &&
+            appointment.status !== "Cancelado",
+        )
+        .map((appointment) => appointment.time),
+    [appointments, displayedDays, selectedDay],
+  );
 
   function confirm() {
+    const user = users.find((item) => item.id === selectedUserId);
+    const service = services.find((item) => item.name === selectedService);
     const channel = appointmentChannels.find(
       (item) => item.id === selectedChannel,
     );
+    if (!user || !service || !selectedTime) return;
+    addAppointment({
+      date: displayedDays[selectedDay].iso,
+      time: selectedTime,
+      name: user.name,
+      service: service.name,
+      duration: `${service.durationMinutes} min`,
+      durationMinutes: service.durationMinutes,
+      status: "Confirmado",
+      initials: user.initials,
+      channelId: selectedChannel,
+      price: service.price,
+      professional: "Ana Souza",
+      notes,
+    });
     showToast(
-      `Agendamento criado para ${weekDays[selectedDay].date}/08 às ${selectedTime} via ${channel?.name}`,
+      `Agendamento de ${user.name} criado para ${displayedDays[selectedDay].full} às ${selectedTime} via ${channel?.name}`,
     );
+    setSelectedTime("");
+    setNotes("");
+  }
+
+  function changeWeek(change: number) {
+    setWeekOffset((current) => current + change);
+    setSelectedDay(0);
+    setSelectedTime("");
   }
 
   return (
@@ -597,13 +944,25 @@ function Scheduling({ showToast }: { showToast: (message: string) => void }) {
           </p>
         </div>
         <div className="inline-flex w-fit items-center gap-2 rounded-xl border border-zinc-200 bg-white p-1">
-          <Button size="icon" variant="ghost" className="size-8">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="size-8"
+            onClick={() => changeWeek(-1)}
+            aria-label="Semana anterior"
+          >
             <ChevronLeft />
           </Button>
           <span className="min-w-36 text-center text-sm font-semibold">
-            Julho — Agosto 2026
+            {periodLabel}
           </span>
-          <Button size="icon" variant="ghost" className="size-8">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="size-8"
+            onClick={() => changeWeek(1)}
+            aria-label="Próxima semana"
+          >
             <ChevronRight />
           </Button>
         </div>
@@ -614,7 +973,7 @@ function Scheduling({ showToast }: { showToast: (message: string) => void }) {
           <Card>
             <CardContent className="p-3 md:p-4 xl:p-5">
               <div className="grid grid-cols-7 gap-1.5 xl:gap-2">
-                {weekDays.map((item, index) => (
+                {displayedDays.map((item, index) => (
                   <button
                     key={item.date}
                     onClick={() => setSelectedDay(index)}
@@ -638,7 +997,7 @@ function Scheduling({ showToast }: { showToast: (message: string) => void }) {
                     <span className="mt-1 text-lg font-semibold xl:text-xl">
                       {item.date}
                     </span>
-                    {index === 5 && (
+                    {item.iso === "2026-08-01" && (
                       <span
                         className={cn(
                           "mt-1 size-1 rounded-full",
@@ -657,7 +1016,7 @@ function Scheduling({ showToast }: { showToast: (message: string) => void }) {
               <div>
                 <CardTitle>Horários disponíveis</CardTitle>
                 <CardDescription>
-                  {weekDays[selectedDay].full} · 30 min por horário
+                  {displayedDays[selectedDay].full} · 30 min por horário
                 </CardDescription>
               </div>
               <div className="hidden items-center gap-2 text-[9px] text-zinc-400 md:flex xl:gap-3 xl:text-[10px]">
@@ -681,7 +1040,7 @@ function Scheduling({ showToast }: { showToast: (message: string) => void }) {
                     key={time}
                     time={time}
                     selected={selectedTime === time}
-                    disabled={occupied.includes(time)}
+                    disabled={occupiedTimes.includes(time)}
                     onClick={() => setSelectedTime(time)}
                   />
                 ))}
@@ -697,7 +1056,7 @@ function Scheduling({ showToast }: { showToast: (message: string) => void }) {
                     key={time}
                     time={time}
                     selected={selectedTime === time}
-                    disabled={occupied.includes(time)}
+                    disabled={occupiedTimes.includes(time)}
                     onClick={() => setSelectedTime(time)}
                   />
                 ))}
@@ -719,11 +1078,18 @@ function Scheduling({ showToast }: { showToast: (message: string) => void }) {
               <FieldLabel>Cliente</FieldLabel>
               <div className="relative">
                 <CircleUserRound className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
-                <select className="h-11 w-full appearance-none rounded-lg border border-zinc-200 bg-white pl-9 pr-9 text-sm outline-none focus:border-zinc-400">
-                  <option>Marina Costa</option>
-                  <option>Rafael Alves</option>
-                  <option>Beatriz Lima</option>
-                  <option>Novo cliente...</option>
+                <select
+                  value={selectedUserId}
+                  onChange={(event) => setSelectedUserId(event.target.value)}
+                  className="h-11 w-full appearance-none rounded-lg border border-zinc-200 bg-white pl-9 pr-9 text-sm outline-none focus:border-zinc-400"
+                >
+                  {users
+                    .filter((user) => user.role === "Cliente" && user.status === "Ativo")
+                    .map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {user.name}
+                      </option>
+                    ))}
                 </select>
                 <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
               </div>
@@ -731,10 +1097,16 @@ function Scheduling({ showToast }: { showToast: (message: string) => void }) {
             <div>
               <FieldLabel>Serviço</FieldLabel>
               <div className="relative">
-                <select className="h-11 w-full appearance-none rounded-lg border border-zinc-200 bg-white px-3 pr-9 text-sm outline-none focus:border-zinc-400">
-                  <option>Consulta inicial · 45 min</option>
-                  <option>Retorno · 30 min</option>
-                  <option>Avaliação · 60 min</option>
+                <select
+                  value={selectedService}
+                  onChange={(event) => setSelectedService(event.target.value)}
+                  className="h-11 w-full appearance-none rounded-lg border border-zinc-200 bg-white px-3 pr-9 text-sm outline-none focus:border-zinc-400"
+                >
+                  {services.map((service) => (
+                    <option key={service.name} value={service.name}>
+                      {service.name} · {service.durationMinutes} min
+                    </option>
+                  ))}
                 </select>
                 <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
               </div>
@@ -772,7 +1144,7 @@ function Scheduling({ showToast }: { showToast: (message: string) => void }) {
               <div className="flex items-center justify-between text-xs text-zinc-500">
                 <span>Data</span>
                 <strong className="text-zinc-900">
-                  {weekDays[selectedDay].full}
+                  {displayedDays[selectedDay].full}
                 </strong>
               </div>
               <div className="my-2.5 h-px bg-zinc-200" />
@@ -831,22 +1203,40 @@ function TimeButton({
 }
 
 function Users({ showToast }: { showToast: (message: string) => void }) {
+  const { users, addUser, toggleUserStatus } = useAppData();
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("Todos");
+  const [roleFilter, setRoleFilter] = useState("Todos");
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
   const filtered = useMemo(
     () =>
       users.filter(
         (user) =>
-          user.name.toLowerCase().includes(search.toLowerCase()) ||
-          user.email.toLowerCase().includes(search.toLowerCase()),
+          (user.name.toLowerCase().includes(search.toLowerCase()) ||
+            user.email.toLowerCase().includes(search.toLowerCase())) &&
+          (statusFilter === "Todos" || user.status === statusFilter) &&
+          (roleFilter === "Todos" || user.role === roleFilter),
       ),
-    [search],
+    [roleFilter, search, statusFilter, users],
   );
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const visibleUsers = filtered.slice((page - 1) * pageSize, page * pageSize);
 
-  function addUser(event: FormEvent) {
+  function submitUser(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const created = addUser({
+      name: String(form.get("name")),
+      email: String(form.get("email")),
+      phone: String(form.get("phone")),
+      role: String(form.get("role")) as "Cliente" | "Administrador",
+    });
+    event.currentTarget.reset();
     setModal(false);
-    showToast("Novo usuário adicionado com sucesso");
+    setPage(1);
+    showToast(`${created.name} foi adicionado com sucesso`);
   }
 
   return (
@@ -870,18 +1260,41 @@ function Users({ showToast }: { showToast: (message: string) => void }) {
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
           <Input
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             placeholder="Buscar por nome ou e-mail..."
             className="pl-9"
           />
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
-            Status: Todos <ChevronDown />
-          </Button>
-          <Button variant="outline">
-            Perfil: Todos <ChevronDown />
-          </Button>
+          <select
+            value={statusFilter}
+            onChange={(event) => {
+              setStatusFilter(event.target.value);
+              setPage(1);
+            }}
+            aria-label="Filtrar usuários por status"
+            className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium outline-none"
+          >
+            <option>Todos</option>
+            <option>Ativo</option>
+            <option>Inativo</option>
+          </select>
+          <select
+            value={roleFilter}
+            onChange={(event) => {
+              setRoleFilter(event.target.value);
+              setPage(1);
+            }}
+            aria-label="Filtrar usuários por perfil"
+            className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium outline-none"
+          >
+            <option>Todos</option>
+            <option>Cliente</option>
+            <option>Administrador</option>
+          </select>
         </div>
       </div>
 
@@ -895,7 +1308,7 @@ function Users({ showToast }: { showToast: (message: string) => void }) {
           <span />
         </div>
         <div className="divide-y divide-zinc-100">
-          {filtered.map((user) => (
+          {visibleUsers.map((user) => (
             <div
               key={user.email}
               className="grid gap-4 p-5 transition hover:bg-zinc-50 lg:grid-cols-[1.5fr_1.15fr_.8fr_.7fr_.7fr_36px] lg:items-center"
@@ -942,28 +1355,57 @@ function Users({ showToast }: { showToast: (message: string) => void }) {
                 </Badge>
               </div>
               <div className="text-xs text-zinc-500">{user.last}</div>
-              <button className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 hover:text-black">
+              <button
+                title={user.status === "Ativo" ? "Desativar usuário" : "Ativar usuário"}
+                onClick={() => {
+                  toggleUserStatus(user.id);
+                  showToast(
+                    `${user.name} foi ${user.status === "Ativo" ? "desativado" : "ativado"}`,
+                  );
+                }}
+                className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 hover:text-black"
+              >
                 <MoreHorizontal className="size-4" />
               </button>
             </div>
           ))}
         </div>
         <div className="flex items-center justify-between border-t border-zinc-100 px-5 py-4 text-xs text-zinc-500">
-          <span>Mostrando {filtered.length} de 248 usuários</span>
+          <span>
+            Mostrando {visibleUsers.length} de {filtered.length} usuários
+          </span>
           <div className="flex gap-1">
-            <Button variant="outline" size="icon" className="size-8">
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-8"
+              disabled={page === 1}
+              onClick={() => setPage((current) => Math.max(1, current - 1))}
+            >
               <ChevronLeft />
             </Button>
-            <Button variant="default" size="icon" className="size-8">
-              1
-            </Button>
-            <Button variant="ghost" size="icon" className="size-8">
-              2
-            </Button>
-            <Button variant="ghost" size="icon" className="size-8">
-              3
-            </Button>
-            <Button variant="outline" size="icon" className="size-8">
+            {Array.from({ length: pageCount }, (_, index) => index + 1).map(
+              (pageNumber) => (
+                <Button
+                  key={pageNumber}
+                  variant={page === pageNumber ? "default" : "ghost"}
+                  size="icon"
+                  className="size-8"
+                  onClick={() => setPage(pageNumber)}
+                >
+                  {pageNumber}
+                </Button>
+              ),
+            )}
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-8"
+              disabled={page === pageCount}
+              onClick={() =>
+                setPage((current) => Math.min(pageCount, current + 1))
+              }
+            >
               <ChevronRight />
             </Button>
           </div>
@@ -992,23 +1434,23 @@ function Users({ showToast }: { showToast: (message: string) => void }) {
                 <X />
               </Button>
             </CardHeader>
-            <form onSubmit={addUser}>
+            <form onSubmit={submitUser}>
               <CardContent className="space-y-4">
                 <div>
                   <FieldLabel>Nome completo</FieldLabel>
-                  <Input required placeholder="Ex.: João da Silva" />
+                  <Input required name="name" placeholder="Ex.: João da Silva" />
                 </div>
                 <div>
                   <FieldLabel>E-mail</FieldLabel>
-                  <Input required type="email" placeholder="joao@email.com" />
+                  <Input required name="email" type="email" placeholder="joao@email.com" />
                 </div>
                 <div>
                   <FieldLabel>Telefone</FieldLabel>
-                  <Input placeholder="(11) 99999-9999" />
+                  <Input name="phone" placeholder="(11) 99999-9999" />
                 </div>
                 <div>
                   <FieldLabel>Perfil</FieldLabel>
-                  <select className="h-11 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm outline-none">
+                  <select name="role" className="h-11 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm outline-none">
                     <option>Cliente</option>
                     <option>Administrador</option>
                   </select>
@@ -1032,6 +1474,332 @@ function Users({ showToast }: { showToast: (message: string) => void }) {
   );
 }
 
+function Products({ showToast }: { showToast: (message: string) => void }) {
+  const { products, addProduct, removeProduct } = useAppData();
+  const [search, setSearch] = useState("");
+  const [modal, setModal] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("Todos");
+  const [categoryFilter, setCategoryFilter] = useState("Todas");
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
+  const categories = useMemo(
+    () => Array.from(new Set(products.map((product) => product.category))).sort(),
+    [products],
+  );
+  const filtered = useMemo(
+    () =>
+      products.filter((product) => {
+        const term = search.toLowerCase();
+        return (
+          (product.name.toLowerCase().includes(term) ||
+            product.category.toLowerCase().includes(term)) &&
+          (statusFilter === "Todos" || product.status === statusFilter) &&
+          (categoryFilter === "Todas" || product.category === categoryFilter)
+        );
+      }),
+    [categoryFilter, products, search, statusFilter],
+  );
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const visibleProducts = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+  function submitProduct(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const quantity = Number(form.get("quantity"));
+    const selectedStatus = String(form.get("status"));
+    const price = Number(form.get("price"));
+
+    const created = addProduct({
+      name: String(form.get("name")),
+      category: String(form.get("category")),
+      price,
+      quantity,
+      status: selectedStatus as "Ativo" | "Inativo",
+    });
+    event.currentTarget.reset();
+    setModal(false);
+    setPage(1);
+    showToast(`${created.name} foi adicionado com sucesso`);
+  }
+
+  return (
+    <div className="mx-auto max-w-[1500px] p-4 sm:p-6 lg:p-8">
+      <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div>
+          <h2 className="text-lg font-semibold text-zinc-950">
+            Todos os produtos
+          </h2>
+          <p className="mt-1 text-sm text-zinc-500">
+            Gerencie o catálogo e acompanhe o estoque do seu negócio.
+          </p>
+        </div>
+        <Button onClick={() => setModal(true)}>
+          <Plus /> Adicionar produto
+        </Button>
+      </div>
+
+      <div className="mb-4 grid gap-3 sm:grid-cols-[1fr_auto]">
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
+          <Input
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            placeholder="Buscar por nome ou categoria..."
+            className="pl-9"
+          />
+        </div>
+        <div className="flex gap-2">
+          <select
+            value={statusFilter}
+            onChange={(event) => {
+              setStatusFilter(event.target.value);
+              setPage(1);
+            }}
+            aria-label="Filtrar produtos por status"
+            className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium outline-none"
+          >
+            <option>Todos</option>
+            <option>Ativo</option>
+            <option>Baixo estoque</option>
+            <option>Inativo</option>
+          </select>
+          <select
+            value={categoryFilter}
+            onChange={(event) => {
+              setCategoryFilter(event.target.value);
+              setPage(1);
+            }}
+            aria-label="Filtrar produtos por categoria"
+            className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium outline-none"
+          >
+            <option>Todas</option>
+            {categories.map((category) => (
+              <option key={category}>{category}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <Card className="overflow-hidden">
+        <div className="hidden grid-cols-[1.6fr_1fr_.8fr_.65fr_.7fr_36px] items-center gap-4 border-b border-zinc-200 bg-zinc-50/70 px-5 py-3 text-[10px] font-semibold uppercase tracking-wider text-zinc-400 lg:grid">
+          <span>Produto</span>
+          <span>Categoria</span>
+          <span>Preço</span>
+          <span>Quantidade</span>
+          <span>Status</span>
+          <span />
+        </div>
+        <div className="divide-y divide-zinc-100">
+          {visibleProducts.map((product) => (
+            <div
+              key={product.id}
+              className="grid gap-4 p-5 transition hover:bg-zinc-50 lg:grid-cols-[1.6fr_1fr_.8fr_.65fr_.7fr_36px] lg:items-center"
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 ring-1 ring-inset ring-zinc-200">
+                  <Package className="size-4" />
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-zinc-900">
+                    {product.name}
+                  </p>
+                </div>
+              </div>
+              <div className="text-xs font-medium text-zinc-700">
+                {product.category}
+              </div>
+              <div className="text-sm font-semibold text-zinc-900">
+                {formatCurrency(product.price)}
+              </div>
+              <div className="text-xs text-zinc-500">
+                {product.quantity}{" "}
+                {product.quantity === 1 ? "unidade" : "unidades"}
+              </div>
+              <div>
+                <Badge
+                  variant={
+                    product.status === "Ativo"
+                      ? "success"
+                      : product.status === "Baixo estoque"
+                        ? "warning"
+                        : "secondary"
+                  }
+                >
+                  <span className="mr-1.5 size-1.5 rounded-full bg-current" />
+                  {product.status}
+                </Badge>
+              </div>
+              <button
+                type="button"
+                aria-label={`Excluir ${product.name}`}
+                title="Excluir produto"
+                onClick={() => {
+                  if (!window.confirm(`Excluir ${product.name}?`)) return;
+                  removeProduct(product.id);
+                  showToast(`${product.name} foi excluído`);
+                }}
+                className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 hover:text-black"
+              >
+                <MoreHorizontal className="size-4" />
+              </button>
+            </div>
+          ))}
+          {filtered.length === 0 && (
+            <div className="px-5 py-12 text-center">
+              <Package className="mx-auto size-8 text-zinc-300" />
+              <p className="mt-3 text-sm font-medium text-zinc-700">
+                Nenhum produto encontrado
+              </p>
+              <p className="mt-1 text-xs text-zinc-400">
+                Tente buscar por outro nome ou categoria.
+              </p>
+            </div>
+          )}
+        </div>
+        <div className="flex items-center justify-between border-t border-zinc-100 px-5 py-4 text-xs text-zinc-500">
+          <span>
+            Mostrando {visibleProducts.length} de {filtered.length} produtos
+          </span>
+          <div className="flex gap-1">
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-8"
+              disabled={page === 1}
+              onClick={() => setPage((current) => Math.max(1, current - 1))}
+            >
+              <ChevronLeft />
+            </Button>
+            {Array.from({ length: pageCount }, (_, index) => index + 1).map(
+              (pageNumber) => (
+                <Button
+                  key={pageNumber}
+                  variant={page === pageNumber ? "default" : "ghost"}
+                  size="icon"
+                  className="size-8"
+                  onClick={() => setPage(pageNumber)}
+                >
+                  {pageNumber}
+                </Button>
+              ),
+            )}
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-8"
+              disabled={page === pageCount}
+              onClick={() =>
+                setPage((current) => Math.min(pageCount, current + 1))
+              }
+            >
+              <ChevronRight />
+            </Button>
+          </div>
+        </div>
+      </Card>
+
+      {modal && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          onMouseDown={(e) => e.target === e.currentTarget && setModal(false)}
+        >
+          <Card className="w-full max-w-lg shadow-2xl">
+            <CardHeader className="flex-row items-start justify-between">
+              <div>
+                <CardTitle>Adicionar produto</CardTitle>
+                <CardDescription>
+                  Cadastre um novo item no catálogo do negócio.
+                </CardDescription>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="-mr-2 -mt-2"
+                onClick={() => setModal(false)}
+              >
+                <X />
+              </Button>
+            </CardHeader>
+            <form onSubmit={submitProduct}>
+              <CardContent className="space-y-4">
+                <div>
+                  <FieldLabel>Nome do produto</FieldLabel>
+                  <Input
+                    required
+                    name="name"
+                    placeholder="Ex.: Sérum facial vitamina C"
+                  />
+                </div>
+                <div>
+                  <FieldLabel>Categoria</FieldLabel>
+                  <select
+                    name="category"
+                    className="h-11 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm outline-none"
+                  >
+                    <option>Skincare</option>
+                    <option>Proteção solar</option>
+                    <option>Corporal</option>
+                    <option>Higiene</option>
+                    <option>Kits</option>
+                    <option>Outros</option>
+                  </select>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <FieldLabel>Preço</FieldLabel>
+                    <Input
+                      required
+                      min="0"
+                      step="0.01"
+                      type="number"
+                      name="price"
+                      placeholder="0,00"
+                    />
+                  </div>
+                  <div>
+                    <FieldLabel>Quantidade</FieldLabel>
+                    <Input
+                      required
+                      min="0"
+                      step="1"
+                      type="number"
+                      name="quantity"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <FieldLabel>Status</FieldLabel>
+                  <select
+                    name="status"
+                    className="h-11 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm outline-none"
+                  >
+                    <option>Ativo</option>
+                    <option>Inativo</option>
+                  </select>
+                </div>
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setModal(false)}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button type="submit">Adicionar produto</Button>
+                </div>
+              </CardContent>
+            </form>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AppShell({
   onLogout,
   initialView = "dashboard",
@@ -1039,13 +1807,16 @@ function AppShell({
   onLogout: () => void;
   initialView?: View;
 }) {
+  const router = useRouter();
   const [view, setView] = useState<View>(initialView);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [toast, setToast] = useState("");
   const titles = {
     dashboard: ["Olá, Ana!", "Aqui está o resumo do seu dia."],
+    agenda: ["Agenda", "Veja os atendimentos do dia selecionado."],
     agendamentos: ["Agendamentos", "Organize os horários e os atendimentos."],
     usuarios: ["Usuários", "Gerencie sua base de clientes e equipe."],
+    produtos: ["Produtos", "Cadastre e gerencie os produtos do seu negócio."],
   };
 
   function showToast(message: string) {
@@ -1061,6 +1832,7 @@ function AppShell({
         onLogout={onLogout}
         mobileOpen={mobileOpen}
         setMobileOpen={setMobileOpen}
+        showToast={showToast}
       />
       <div className="lg:pl-[256px]">
         <Topbar
@@ -1070,10 +1842,16 @@ function AppShell({
         />
         <main>
           {view === "dashboard" && (
-            <Dashboard onNew={() => setView("agendamentos")} />
+            <Dashboard
+              onNew={() => router.push("/agendamentos")}
+              onViewAgenda={() => router.push("/agenda")}
+              showToast={showToast}
+            />
           )}
+          {view === "agenda" && <Agenda showToast={showToast} />}
           {view === "agendamentos" && <Scheduling showToast={showToast} />}
           {view === "usuarios" && <Users showToast={showToast} />}
+          {view === "produtos" && <Products showToast={showToast} />}
         </main>
       </div>
       <div

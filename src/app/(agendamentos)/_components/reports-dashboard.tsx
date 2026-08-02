@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Area,
@@ -22,7 +22,7 @@ import {
   ArrowDownRight,
   ArrowRight,
   ArrowUpRight,
-  Bell,
+  CalendarClock,
   CalendarDays,
   ChartNoAxesCombined,
   ChevronDown,
@@ -32,6 +32,7 @@ import {
   LogOut,
   Menu,
   MoreHorizontal,
+  Package,
   Settings,
   TrendingUp,
   UserRoundCheck,
@@ -42,6 +43,8 @@ import {
 import { Avatar } from "@/app/(agendamentos)/_components/ui/avatar";
 import { Badge } from "@/app/(agendamentos)/_components/ui/badge";
 import { Button } from "@/app/(agendamentos)/_components/ui/button";
+import { BrandLogo } from "@/app/(agendamentos)/_components/brand-logo";
+import { useAppData } from "@/app/(agendamentos)/_components/app-data-provider";
 import {
   Card,
   CardContent,
@@ -52,145 +55,26 @@ import {
 import { cn } from "@/lib/utils";
 import { appointmentChannels } from "@/app/mocks/scheduling";
 
-const digitalChannels = appointmentChannels.filter((channel) => channel.digital);
-const digitalChannelTotal = digitalChannels.reduce(
-  (total, channel) => total + channel.value,
-  0,
-);
-const digitalChannelPercent = digitalChannels.reduce(
-  (total, channel) => total + channel.percent,
-  0,
-);
+function formatCurrency(value: number) {
+  return value.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    maximumFractionDigits: 0,
+  });
+}
 
-const monthly = [
-  { month: "Fev", agendamentos: 214, cancelados: 19, receita: 29100 },
-  { month: "Mar", agendamentos: 248, cancelados: 16, receita: 33600 },
-  { month: "Abr", agendamentos: 236, cancelados: 21, receita: 32400 },
-  { month: "Mai", agendamentos: 287, cancelados: 18, receita: 39800 },
-  { month: "Jun", agendamentos: 305, cancelados: 15, receita: 44200 },
-  { month: "Jul", agendamentos: 342, cancelados: 17, receita: 48600 },
-];
+function initials(name: string) {
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("");
+}
 
-const statusData = [
-  { name: "Concluídos", value: 286, color: "#18181b" },
-  { name: "Confirmados", value: 30, color: "#71717a" },
-  { name: "Cancelados", value: 17, color: "#d4d4d8" },
-  { name: "Não compareceu", value: 9, color: "#f4f4f5" },
-];
-
-const services = [
-  { name: "Consulta inicial", total: 92, receita: "R$ 13.800" },
-  { name: "Retorno", total: 76, receita: "R$ 7.600" },
-  { name: "Avaliação", total: 61, receita: "R$ 9.150" },
-  { name: "Limpeza de pele", total: 48, receita: "R$ 9.072" },
-  { name: "Procedimento", total: 39, receita: "R$ 7.410" },
-  { name: "Outros", total: 26, receita: "R$ 1.568" },
-];
-
-const hourly = [
-  { hour: "08h", ocupacao: 42 },
-  { hour: "09h", ocupacao: 76 },
-  { hour: "10h", ocupacao: 94 },
-  { hour: "11h", ocupacao: 81 },
-  { hour: "12h", ocupacao: 34 },
-  { hour: "13h", ocupacao: 68 },
-  { hour: "14h", ocupacao: 86 },
-  { hour: "15h", ocupacao: 97 },
-  { hour: "16h", ocupacao: 89 },
-  { hour: "17h", ocupacao: 72 },
-  { hour: "18h", ocupacao: 48 },
-];
-
-const weekMatrix = [
-  { day: "Seg", values: [1, 2, 3, 3, 2, 1, 0] },
-  { day: "Ter", values: [2, 3, 4, 4, 3, 2, 1] },
-  { day: "Qua", values: [1, 3, 4, 3, 4, 2, 1] },
-  { day: "Qui", values: [2, 4, 4, 4, 3, 3, 1] },
-  { day: "Sex", values: [1, 3, 4, 4, 4, 2, 1] },
-  { day: "Sáb", values: [3, 4, 4, 3, 2, 0, 0] },
-];
-
-const professionals = [
-  {
-    name: "Ana Souza",
-    initials: "AS",
-    appointments: 126,
-    presence: "94%",
-    occupancy: "86%",
-    revenue: "R$ 19.420",
-    score: "4,9",
-  },
-  {
-    name: "Clara Mendes",
-    initials: "CM",
-    appointments: 98,
-    presence: "91%",
-    occupancy: "79%",
-    revenue: "R$ 15.870",
-    score: "4,8",
-  },
-  {
-    name: "Paula Freitas",
-    initials: "PF",
-    appointments: 74,
-    presence: "89%",
-    occupancy: "72%",
-    revenue: "R$ 9.760",
-    score: "4,9",
-  },
-  {
-    name: "Bruna Lima",
-    initials: "BL",
-    appointments: 44,
-    presence: "93%",
-    occupancy: "64%",
-    revenue: "R$ 3.550",
-    score: "4,7",
-  },
-];
-
-const clients = [
-  {
-    name: "Marina Costa",
-    initials: "MC",
-    visits: 9,
-    spent: "R$ 1.890",
-    last: "29 jul",
-    status: "Recorrente",
-  },
-  {
-    name: "Beatriz Lima",
-    initials: "BL",
-    visits: 8,
-    spent: "R$ 1.640",
-    last: "30 jul",
-    status: "Recorrente",
-  },
-  {
-    name: "Camila Rocha",
-    initials: "CR",
-    visits: 7,
-    spent: "R$ 1.420",
-    last: "27 jul",
-    status: "Recorrente",
-  },
-  {
-    name: "Rafael Alves",
-    initials: "RA",
-    visits: 6,
-    spent: "R$ 1.180",
-    last: "31 jul",
-    status: "Ativo",
-  },
-  {
-    name: "Lucas Mendes",
-    initials: "LM",
-    visits: 5,
-    spent: "R$ 980",
-    last: "24 jul",
-    status: "Ativo",
-  },
-];
+function percentageChange(current: number, previous: number) {
+  if (!previous) return current ? 100 : 0;
+  return ((current - previous) / previous) * 100;
+}
 
 function ReportSidebar({
   open,
@@ -201,8 +85,10 @@ function ReportSidebar({
 }) {
   const items = [
     { label: "Início", icon: LayoutDashboard, href: "/dashboard" },
+    { label: "Agenda", icon: CalendarClock, href: "/agenda" },
     { label: "Agendamentos", icon: CalendarDays, href: "/agendamentos" },
     { label: "Usuários", icon: UsersRound, href: "/usuarios" },
+    { label: "Produtos", icon: Package, href: "/produtos" },
     {
       label: "Relatórios",
       icon: ChartNoAxesCombined,
@@ -225,23 +111,20 @@ function ReportSidebar({
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="flex h-14 items-center justify-between px-2">
-          <Link href="/" className="flex items-center gap-3">
-            <span className="flex size-9 items-center justify-center rounded-xl bg-black text-white">
-              <CalendarDays className="size-[18px]" />
-            </span>
-            <span className="font-semibold tracking-tight">Atempo</span>
+        <div className="relative flex h-20 items-center justify-center px-2">
+          <Link href="/dashboard" aria-label="Ir para o início">
+            <BrandLogo />
           </Link>
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden"
+            className="absolute right-2 lg:hidden"
             onClick={() => setOpen(false)}
           >
             <X />
           </Button>
         </div>
-        <div className="mt-8 px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
+        <div className="mt-3 px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
           Menu principal
         </div>
         <nav className="mt-3 space-y-1">
@@ -260,11 +143,6 @@ function ReportSidebar({
                 <Icon className="size-[18px] stroke-[1.75]" />
               </span>
               <span className="text-[14px] font-medium leading-5">{label}</span>
-              {label === "Agendamentos" && (
-                <span className="ml-auto rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] text-zinc-500">
-                  5
-                </span>
-              )}
             </Link>
           ))}
         </nav>
@@ -400,8 +278,10 @@ function SectionHead({
 }
 
 export function ReportsDashboard() {
+  const { appointments } = useAppData();
   const [menuOpen, setMenuOpen] = useState(false);
   const [period, setPeriod] = useState("Últimos 6 meses");
+  const [toast, setToast] = useState("");
   const heatColors = [
     "bg-zinc-100",
     "bg-zinc-200",
@@ -409,6 +289,301 @@ export function ReportsDashboard() {
     "bg-zinc-600",
     "bg-zinc-950",
   ];
+  const monthsInPeriod =
+    period === "Este mês"
+      ? 1
+      : period === "Últimos 3 meses"
+        ? 3
+        : period === "Últimos 6 meses"
+          ? 6
+          : 12;
+  const periodStart = new Date(2026, 8 - monthsInPeriod, 1).getTime();
+  const previousStart = new Date(2026, 8 - monthsInPeriod * 2, 1).getTime();
+  const previousEnd = new Date(periodStart);
+  previousEnd.setDate(0);
+  const filteredAppointments = useMemo(
+    () =>
+      appointments.filter((appointment) => {
+        const date = new Date(`${appointment.date}T12:00:00`);
+        return (
+          date.getTime() >= periodStart &&
+          date <= new Date("2026-08-31T23:59:59")
+        );
+      }),
+    [appointments, periodStart],
+  );
+  const previousAppointments = appointments.filter((appointment) => {
+    const date = new Date(`${appointment.date}T12:00:00`);
+    return date.getTime() >= previousStart && date <= previousEnd;
+  });
+  const payableAppointments = filteredAppointments.filter(
+    (appointment) =>
+      appointment.status !== "Cancelado" &&
+      appointment.status !== "Não compareceu",
+  );
+  const previousPayable = previousAppointments.filter(
+    (appointment) =>
+      appointment.status !== "Cancelado" &&
+      appointment.status !== "Não compareceu",
+  );
+  const totalRevenue = payableAppointments.reduce(
+    (total, appointment) => total + appointment.price,
+    0,
+  );
+  const previousRevenue = previousPayable.reduce(
+    (total, appointment) => total + appointment.price,
+    0,
+  );
+  const completed = filteredAppointments.filter(
+    (appointment) => appointment.status === "Concluído",
+  ).length;
+  const attendanceBase = filteredAppointments.filter(
+    (appointment) =>
+      appointment.status !== "Cancelado" && appointment.status !== "Pendente",
+  ).length;
+  const attendanceRate = attendanceBase ? (completed / attendanceBase) * 100 : 0;
+  const occupiedMinutes = payableAppointments.reduce(
+    (total, appointment) => total + appointment.durationMinutes,
+    0,
+  );
+  const capacityMinutes = monthsInPeriod * 28 * 10 * 60;
+  const occupancyRate = capacityMinutes
+    ? Math.min(100, (occupiedMinutes / capacityMinutes) * 100)
+    : 0;
+  const appointmentChange = percentageChange(
+    filteredAppointments.length,
+    previousAppointments.length,
+  );
+  const revenueChange = percentageChange(totalRevenue, previousRevenue);
+
+  const monthly = useMemo(() => {
+    const grouped = new Map<
+      string,
+      { key: string; month: string; agendamentos: number; cancelados: number; receita: number }
+    >();
+    filteredAppointments.forEach((appointment) => {
+      const date = new Date(`${appointment.date}T12:00:00`);
+      const key = appointment.date.slice(0, 7);
+      const current = grouped.get(key) ?? {
+        key,
+        month: new Intl.DateTimeFormat("pt-BR", { month: "short" })
+          .format(date)
+          .replace(".", ""),
+        agendamentos: 0,
+        cancelados: 0,
+        receita: 0,
+      };
+      current.agendamentos += 1;
+      if (appointment.status === "Cancelado") current.cancelados += 1;
+      if (
+        appointment.status !== "Cancelado" &&
+        appointment.status !== "Não compareceu"
+      ) {
+        current.receita += appointment.price;
+      }
+      grouped.set(key, current);
+    });
+    return Array.from(grouped.values()).sort((a, b) => a.key.localeCompare(b.key));
+  }, [filteredAppointments]);
+
+  const statusData = [
+    { name: "Concluídos", status: "Concluído", color: "#18181b" },
+    { name: "Confirmados", status: "Confirmado", color: "#71717a" },
+    { name: "Pendentes", status: "Pendente", color: "#a1a1aa" },
+    { name: "Cancelados", status: "Cancelado", color: "#d4d4d8" },
+    { name: "Não compareceu", status: "Não compareceu", color: "#f4f4f5" },
+  ].map((item) => ({
+    ...item,
+    value: filteredAppointments.filter(
+      (appointment) => appointment.status === item.status,
+    ).length,
+  }));
+
+  const serviceMap = new Map<string, { name: string; total: number; receita: number }>();
+  payableAppointments.forEach((appointment) => {
+    const current = serviceMap.get(appointment.service) ?? {
+      name: appointment.service,
+      total: 0,
+      receita: 0,
+    };
+    current.total += 1;
+    current.receita += appointment.price;
+    serviceMap.set(appointment.service, current);
+  });
+  const services = Array.from(serviceMap.values()).sort((a, b) => b.total - a.total);
+
+  const hourlyCounts = Array.from(
+    new Set(filteredAppointments.map((appointment) => appointment.time.slice(0, 2))),
+  )
+    .sort()
+    .map((hour) => ({
+      hour: `${hour}h`,
+      total: filteredAppointments.filter((appointment) => appointment.time.startsWith(hour)).length,
+    }));
+  const peakHourCount = Math.max(...hourlyCounts.map((item) => item.total), 1);
+  const hourly = hourlyCounts.map((item) => ({
+    hour: item.hour,
+    ocupacao: Math.round((item.total / peakHourCount) * 100),
+  }));
+  const peakHour = hourly.reduce(
+    (peak, item) => (item.ocupacao > peak.ocupacao ? item : peak),
+    hourly[0] ?? { hour: "—", ocupacao: 0 },
+  );
+
+  const buckets = [8, 9, 10, 13, 14, 15, 16];
+  const weekCounts = Array.from({ length: 6 }, (_, dayIndex) =>
+    buckets.map(
+      (hour) =>
+        filteredAppointments.filter((appointment) => {
+          const date = new Date(`${appointment.date}T12:00:00`);
+          const normalizedDay = date.getDay() === 0 ? 6 : date.getDay() - 1;
+          return normalizedDay === dayIndex && Number(appointment.time.slice(0, 2)) === hour;
+        }).length,
+    ),
+  );
+  const maxHeat = Math.max(...weekCounts.flat(), 1);
+  const weekMatrix = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map(
+    (day, index) => ({
+      day,
+      values: weekCounts[index].map((value) => Math.round((value / maxHeat) * 4)),
+    }),
+  );
+
+  const channelData = appointmentChannels.map((channel) => {
+    const value = filteredAppointments.filter(
+      (appointment) => appointment.channelId === channel.id,
+    ).length;
+    return {
+      ...channel,
+      value,
+      percent: filteredAppointments.length
+        ? Math.round((value / filteredAppointments.length) * 100)
+        : 0,
+    };
+  });
+  const digitalChannelTotal = channelData
+    .filter((channel) => channel.digital)
+    .reduce((total, channel) => total + channel.value, 0);
+  const digitalChannelPercent = filteredAppointments.length
+    ? Math.round((digitalChannelTotal / filteredAppointments.length) * 100)
+    : 0;
+
+  const professionalNames = Array.from(
+    new Set(filteredAppointments.map((appointment) => appointment.professional)),
+  );
+  const professionalCounts = professionalNames.map((name) => ({
+    name,
+    records: filteredAppointments.filter(
+      (appointment) => appointment.professional === name,
+    ),
+  }));
+  const maxProfessionalCount = Math.max(
+    ...professionalCounts.map((item) => item.records.length),
+    1,
+  );
+  const professionals = professionalCounts
+    .map(({ name, records }) => {
+      const valid = records.filter((item) => item.status !== "Cancelado");
+      const attended = records.filter((item) => item.status === "Concluído");
+      const presence = valid.length ? (attended.length / valid.length) * 100 : 0;
+      const revenue = records
+        .filter(
+          (item) => item.status !== "Cancelado" && item.status !== "Não compareceu",
+        )
+        .reduce((total, item) => total + item.price, 0);
+      return {
+        name,
+        initials: initials(name),
+        appointments: records.length,
+        presence: `${presence.toFixed(1).replace(".", ",")}%`,
+        occupancy: `${Math.round((records.length / maxProfessionalCount) * 100)}%`,
+        revenue: formatCurrency(revenue),
+        score: (4.5 + Math.min(0.4, presence / 250)).toFixed(1).replace(".", ","),
+      };
+    })
+    .sort((a, b) => b.appointments - a.appointments);
+
+  const clientNames = Array.from(
+    new Set(filteredAppointments.map((appointment) => appointment.name)),
+  );
+  const clients = clientNames
+    .map((name) => {
+      const records = filteredAppointments
+        .filter((appointment) => appointment.name === name)
+        .sort((a, b) => b.date.localeCompare(a.date));
+      const spent = records
+        .filter(
+          (item) => item.status !== "Cancelado" && item.status !== "Não compareceu",
+        )
+        .reduce((total, item) => total + item.price, 0);
+      return {
+        name,
+        initials: initials(name),
+        visits: records.length,
+        spent: formatCurrency(spent),
+        last: records[0]?.date
+          ? new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" })
+              .format(new Date(`${records[0].date}T12:00:00`))
+              .replace(".", "")
+          : "—",
+        status: records.length >= 5 ? "Recorrente" : "Ativo",
+      };
+    })
+    .sort((a, b) => b.visits - a.visits)
+    .slice(0, 5);
+
+  const received = filteredAppointments
+    .filter((appointment) => appointment.status === "Concluído")
+    .reduce((total, appointment) => total + appointment.price, 0);
+  const receivable = filteredAppointments
+    .filter(
+      (appointment) =>
+        appointment.status === "Confirmado" || appointment.status === "Pendente",
+    )
+    .reduce((total, appointment) => total + appointment.price, 0);
+  const cancelledRevenue = filteredAppointments
+    .filter(
+      (appointment) =>
+        appointment.status === "Cancelado" ||
+        appointment.status === "Não compareceu",
+    )
+    .reduce((total, appointment) => total + appointment.price, 0);
+
+  function showToast(message: string) {
+    setToast(message);
+    window.setTimeout(() => setToast(""), 3200);
+  }
+
+  function exportReport() {
+    const header = [
+      "Data",
+      "Horário",
+      "Cliente",
+      "Serviço",
+      "Status",
+      "Canal",
+      "Valor",
+    ];
+    const rows = filteredAppointments.map((appointment) => [
+      appointment.date,
+      appointment.time,
+      appointment.name,
+      appointment.service,
+      appointment.status,
+      appointmentChannels.find((channel) => channel.id === appointment.channelId)?.name ?? "",
+      appointment.price.toFixed(2),
+    ]);
+    const csv = [header, ...rows]
+      .map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(";"))
+      .join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `relatorio-${period.toLowerCase().replaceAll(" ", "-")}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast("Relatório exportado em CSV");
+  }
 
   return (
     <div className="min-h-screen bg-[#f4f4f5] text-zinc-950">
@@ -431,18 +606,6 @@ export function ReportsDashboard() {
               Dados consolidados para acompanhar a operação.
             </p>
           </div>
-          <button className="relative flex size-10 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50">
-            <Bell className="size-[18px]" />
-            <span className="absolute right-2 top-2 size-1.5 rounded-full bg-black ring-2 ring-white" />
-          </button>
-          <div className="hidden h-8 w-px bg-zinc-200 sm:block" />
-          <div className="hidden items-center gap-2 sm:flex">
-            <Avatar
-              initials="AS"
-              className="size-9 bg-zinc-950 text-white ring-0"
-            />
-            <ChevronDown className="size-4 text-zinc-400" />
-          </div>
         </header>
 
         <main className="mx-auto max-w-[1560px] p-4 sm:p-6 lg:p-8">
@@ -450,7 +613,7 @@ export function ReportsDashboard() {
             <div>
               <p className="text-sm font-medium">Desempenho do negócio</p>
               <p className="mt-1 text-sm text-zinc-500">
-                Atualizado em 1 de agosto de 2026, às 08:30.
+                Dados atualizados em tempo real a partir dos atendimentos.
               </p>
             </div>
             <div className="flex gap-2">
@@ -467,7 +630,7 @@ export function ReportsDashboard() {
                 </select>
                 <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
               </div>
-              <Button variant="outline">
+              <Button variant="outline" onClick={exportReport}>
                 <Download /> Exportar
               </Button>
             </div>
@@ -476,30 +639,32 @@ export function ReportsDashboard() {
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <MetricCard
               title="Total de agendamentos"
-              value="342"
-              change="12,1%"
-              description="37 a mais que no período anterior"
+              value={filteredAppointments.length.toLocaleString("pt-BR")}
+              change={`${Math.abs(appointmentChange).toFixed(1).replace(".", ",")}%`}
+              description={`${filteredAppointments.length - previousAppointments.length} em relação ao período anterior`}
               icon={CalendarDays}
+              positive={appointmentChange >= 0}
             />
             <MetricCard
               title="Receita estimada"
-              value="R$ 48,6 mil"
-              change="9,9%"
-              description="Ticket médio de R$ 169,90"
+              value={formatCurrency(totalRevenue)}
+              change={`${Math.abs(revenueChange).toFixed(1).replace(".", ",")}%`}
+              description={`Ticket médio de ${formatCurrency(payableAppointments.length ? totalRevenue / payableAppointments.length : 0)}`}
               icon={WalletCards}
+              positive={revenueChange >= 0}
             />
             <MetricCard
               title="Taxa de comparecimento"
-              value="92,1%"
-              change="2,4%"
-              description="286 atendimentos concluídos"
+              value={`${attendanceRate.toFixed(1).replace(".", ",")}%`}
+              change={`${completed.toLocaleString("pt-BR")} concluídos`}
+              description={`${attendanceBase.toLocaleString("pt-BR")} atendimentos considerados`}
               icon={UserRoundCheck}
             />
             <MetricCard
               title="Taxa de ocupação"
-              value="78,4%"
-              change="4,7%"
-              description="264 horas reservadas no mês"
+              value={`${occupancyRate.toFixed(1).replace(".", ",")}%`}
+              change={`${Math.round(occupiedMinutes / 60)}h`}
+              description="Horas reservadas sobre a capacidade do período"
               icon={Clock3}
             />
           </div>
@@ -511,7 +676,8 @@ export function ReportsDashboard() {
                 description={`${period} · volume total e cancelamentos`}
                 action={
                   <Badge variant="outline">
-                    <TrendingUp className="mr-1 size-3" /> Tendência positiva
+                    <TrendingUp className="mr-1 size-3" />{" "}
+                    {appointmentChange >= 0 ? "Tendência positiva" : "Tendência de queda"}
                   </Badge>
                 }
               />
@@ -617,7 +783,9 @@ export function ReportsDashboard() {
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                    <strong className="text-3xl">342</strong>
+                    <strong className="text-3xl">
+                      {filteredAppointments.length.toLocaleString("pt-BR")}
+                    </strong>
                     <span className="text-[11px] text-zinc-400">total</span>
                   </div>
                 </div>
@@ -648,7 +816,15 @@ export function ReportsDashboard() {
                 title="Serviços mais agendados"
                 description="Volume e receita estimada por serviço"
                 action={
-                  <Button variant="ghost" size="sm">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      showToast(
+                        `${services.length} serviços contabilizados no período`,
+                      )
+                    }
+                  >
                     Detalhes <ArrowRight />
                   </Button>
                 }
@@ -697,7 +873,7 @@ export function ReportsDashboard() {
               <SectionHead
                 title="Ocupação por horário"
                 description="Percentual médio de horários preenchidos"
-                action={<Badge variant="secondary">Pico: 15h</Badge>}
+                action={<Badge variant="secondary">Pico: {peakHour.hour}</Badge>}
               />
               <CardContent>
                 <div className="h-[300px]">
@@ -793,7 +969,7 @@ export function ReportsDashboard() {
                 description="Canais usados pelos clientes"
               />
               <CardContent className="space-y-6">
-                {appointmentChannels.map((channel) => (
+                {channelData.map((channel) => (
                   <div key={channel.name}>
                     <div className="mb-2 flex items-center justify-between text-sm">
                       <span className="font-medium text-zinc-700">
@@ -827,44 +1003,47 @@ export function ReportsDashboard() {
 
           <Card className="mt-4 overflow-hidden">
             <SectionHead
-              title="Desempenho por profissional"
-              description="Produtividade, presença, ocupação e receita"
+              title="Clientes com maior recorrência"
+              description="Frequência e valor acumulado no período"
               action={
-                <Button variant="outline" size="sm">
-                  Ver equipe <ArrowRight />
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/usuarios">
+                    Ver clientes <ArrowRight />
+                  </Link>
                 </Button>
               }
             />
             <div className="overflow-x-auto">
-              <div className="min-w-[820px]">
-                <div className="grid grid-cols-[1.4fr_repeat(5,.8fr)_40px] gap-4 border-y border-zinc-200 bg-zinc-50 px-5 py-3 text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
-                  <span>Profissional</span>
-                  <span>Atendimentos</span>
-                  <span>Presença</span>
-                  <span>Ocupação</span>
-                  <span>Receita</span>
-                  <span>Avaliação</span>
-                  <span />
+              <div className="min-w-[720px]">
+                <div className="grid grid-cols-[1.6fr_repeat(4,.8fr)] gap-4 border-y border-zinc-200 bg-zinc-50 px-5 py-3 text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
+                  <span>Cliente</span>
+                  <span>Visitas</span>
+                  <span>Valor acumulado</span>
+                  <span>Última visita</span>
+                  <span>Perfil</span>
                 </div>
-                {professionals.map((person) => (
+                {clients.map((client) => (
                   <div
-                    key={person.name}
-                    className="grid grid-cols-[1.4fr_repeat(5,.8fr)_40px] items-center gap-4 border-b border-zinc-100 px-5 py-4 text-sm last:border-0 hover:bg-zinc-50"
+                    key={client.name}
+                    className="grid grid-cols-[1.6fr_repeat(4,.8fr)] items-center gap-4 border-b border-zinc-100 px-5 py-4 text-sm last:border-0 hover:bg-zinc-50"
                   >
                     <div className="flex items-center gap-3">
-                      <Avatar initials={person.initials} />
-                      <strong>{person.name}</strong>
+                      <Avatar initials={client.initials} />
+                      <strong>{client.name}</strong>
                     </div>
-                    <span>{person.appointments}</span>
-                    <span>{person.presence}</span>
-                    <span>{person.occupancy}</span>
-                    <strong>{person.revenue}</strong>
-                    <span className="flex items-center gap-1">
-                      ★ {person.score}
-                    </span>
-                    <button className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-100">
-                      <MoreHorizontal className="size-4" />
-                    </button>
+                    <span>{client.visits}</span>
+                    <strong>{client.spent}</strong>
+                    <span className="text-zinc-500">{client.last}</span>
+                    <Badge
+                      variant={
+                        client.status === "Recorrente"
+                          ? "default"
+                          : "secondary"
+                      }
+                      className="w-fit"
+                    >
+                      {client.status}
+                    </Badge>
                   </div>
                 ))}
               </div>
@@ -874,40 +1053,54 @@ export function ReportsDashboard() {
           <div className="mt-4 grid gap-4 xl:grid-cols-[1.25fr_.75fr]">
             <Card className="overflow-hidden">
               <SectionHead
-                title="Clientes com maior recorrência"
-                description="Frequência e valor acumulado no período"
+                title="Desempenho por profissional"
+                description="Produtividade, presença, ocupação e receita"
+                action={
+                  <Button asChild variant="outline" size="sm">
+                    <Link href="/usuarios">
+                      Ver equipe <ArrowRight />
+                    </Link>
+                  </Button>
+                }
               />
               <div className="overflow-x-auto">
-                <div className="min-w-[620px]">
-                  <div className="grid grid-cols-[1.5fr_repeat(4,.7fr)] gap-4 border-y border-zinc-200 bg-zinc-50 px-5 py-3 text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
-                    <span>Cliente</span>
-                    <span>Visitas</span>
-                    <span>Valor</span>
-                    <span>Última visita</span>
-                    <span>Perfil</span>
+                <div className="min-w-[820px]">
+                  <div className="grid grid-cols-[1.4fr_repeat(5,.8fr)_40px] gap-4 border-y border-zinc-200 bg-zinc-50 px-5 py-3 text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
+                    <span>Profissional</span>
+                    <span>Atendimentos</span>
+                    <span>Presença</span>
+                    <span>Ocupação</span>
+                    <span>Receita</span>
+                    <span>Avaliação</span>
+                    <span />
                   </div>
-                  {clients.map((client) => (
+                  {professionals.map((person) => (
                     <div
-                      key={client.name}
-                      className="grid grid-cols-[1.5fr_repeat(4,.7fr)] items-center gap-4 border-b border-zinc-100 px-5 py-3.5 text-sm last:border-0"
+                      key={person.name}
+                      className="grid grid-cols-[1.4fr_repeat(5,.8fr)_40px] items-center gap-4 border-b border-zinc-100 px-5 py-3.5 text-sm last:border-0 hover:bg-zinc-50"
                     >
                       <div className="flex items-center gap-3">
-                        <Avatar initials={client.initials} />
-                        <strong>{client.name}</strong>
+                        <Avatar initials={person.initials} />
+                        <strong>{person.name}</strong>
                       </div>
-                      <span>{client.visits}</span>
-                      <strong>{client.spent}</strong>
-                      <span className="text-zinc-500">{client.last}</span>
-                      <Badge
-                        variant={
-                          client.status === "Recorrente"
-                            ? "default"
-                            : "secondary"
+                      <span>{person.appointments}</span>
+                      <span>{person.presence}</span>
+                      <span>{person.occupancy}</span>
+                      <strong>{person.revenue}</strong>
+                      <span className="flex items-center gap-1">
+                        ★ {person.score}
+                      </span>
+                      <button
+                        title="Ver resumo do profissional"
+                        onClick={() =>
+                          showToast(
+                            `${person.name}: ${person.appointments} atendimentos e ${person.revenue} em receita`,
+                          )
                         }
-                        className="w-fit"
+                        className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-100"
                       >
-                        {client.status}
-                      </Badge>
+                        <MoreHorizontal className="size-4" />
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -923,14 +1116,16 @@ export function ReportsDashboard() {
                   <div className="flex items-center justify-between rounded-xl bg-zinc-950 p-5 text-white">
                     <div>
                       <p className="text-xs text-zinc-400">Receita bruta</p>
-                      <strong className="mt-1 block text-2xl">R$ 48.600</strong>
+                      <strong className="mt-1 block text-2xl">
+                        {formatCurrency(received + receivable + cancelledRevenue)}
+                      </strong>
                     </div>
                     <WalletCards className="size-6 text-zinc-500" />
                   </div>
                   {[
-                    { label: "Recebido", value: "R$ 42.380", percent: 87 },
-                    { label: "A receber", value: "R$ 4.720", percent: 10 },
-                    { label: "Cancelado", value: "R$ 1.500", percent: 3 },
+                    { label: "Recebido", value: received },
+                    { label: "A receber", value: receivable },
+                    { label: "Cancelado", value: cancelledRevenue },
                   ].map((item) => (
                     <div
                       key={item.label}
@@ -938,9 +1133,16 @@ export function ReportsDashboard() {
                     >
                       <span className="text-zinc-500">{item.label}</span>
                       <span>
-                        <strong>{item.value}</strong>{" "}
+                        <strong>{formatCurrency(item.value)}</strong>{" "}
                         <small className="ml-1 text-zinc-400">
-                          {item.percent}%
+                          {received + receivable + cancelledRevenue
+                            ? Math.round(
+                                (item.value /
+                                  (received + receivable + cancelledRevenue)) *
+                                  100,
+                              )
+                            : 0}
+                          %
                         </small>
                       </span>
                     </div>
@@ -952,7 +1154,8 @@ export function ReportsDashboard() {
                       Crescimento mensal
                     </p>
                     <strong className="text-lg text-emerald-900">
-                      + R$ 4.400
+                      {revenueChange >= 0 ? "+ " : "- "}
+                      {formatCurrency(Math.abs(totalRevenue - previousRevenue))}
                     </strong>
                   </div>
                   <ArrowUpRight className="size-5 text-emerald-700" />
@@ -965,6 +1168,17 @@ export function ReportsDashboard() {
             Todos os dados desta tela são simulados para demonstração do MVP.
           </p>
         </main>
+      </div>
+      <div
+        role="status"
+        className={cn(
+          "fixed bottom-5 right-5 z-[80] rounded-xl bg-zinc-950 px-4 py-3 text-sm font-medium text-white shadow-2xl transition-all",
+          toast
+            ? "translate-y-0 opacity-100"
+            : "pointer-events-none translate-y-4 opacity-0",
+        )}
+      >
+        {toast}
       </div>
     </div>
   );
