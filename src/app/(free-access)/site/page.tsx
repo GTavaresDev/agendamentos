@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { ClinicLanding } from "@/app/(free-access)/_components/clinic-landing";
 
 export const metadata: Metadata = {
-  title: "VisioNew Clínica — Estética com naturalidade",
-  description: "Tratamentos estéticos personalizados para revelar sua melhor versão com leveza, segurança e naturalidade.",
+  title: "Agendamentos — Gestão Inteligente",
+  description: "Plataforma completa para controle de agendamentos, clientes, produtos e relatórios operacionais em tempo real.",
 };
 
 export default function FreeAccessPage() {

@@ -1,11 +1,21 @@
 import type { Metadata } from "next";
-import { ReportsDashboard } from "@/app/(agendamentos)/_components/reports-dashboard";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import { canAccessReports } from "@/lib/permissions";
+import { ReportsDashboard } from "./components/reports-dashboard";
 
 export const metadata: Metadata = {
-  title: "Relatórios — Cliente",
+  title: "Relatórios — Agendamentos",
   description: "Indicadores e análises dos agendamentos.",
 };
 
-export default function ReportsPage() {
+export default async function ReportsPage() {
+  const session = await auth();
+  const hasReportsPermission = canAccessReports(session?.user);
+
+  if (!hasReportsPermission) {
+    redirect("/dashboard");
+  }
+
   return <ReportsDashboard />;
 }

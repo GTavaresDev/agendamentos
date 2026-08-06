@@ -3,15 +3,15 @@ import Image from "next/image";
 import { ArrowUpRight, CalendarDays, Globe2, Instagram, MapPin, MessageCircle, Sparkles } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Links — VisioNew Clínica",
-  description: "Agendamento, WhatsApp, localização e site oficial da VisioNew Clínica.",
+  title: "Links — Agendamentos",
+  description: "Agendamento, WhatsApp, localização e informações de contato do Agendamentos.",
 };
 
 const links = [
-  { title: "Agende seu horário", description: "Escolha o melhor dia para cuidar de você", href: "/agendamentos", icon: CalendarDays },
-  { title: "Fale pelo WhatsApp", description: "Tire dúvidas com a nossa equipe", href: "https://wa.me/5511998765432?text=Olá%2C%20vim%20pelo%20link%20da%20VisioNew", icon: MessageCircle, external: true },
+  { title: "Agende seu horário", description: "Escolha o melhor dia e horário para o seu atendimento", href: "/agendamentos", icon: CalendarDays },
+  { title: "Fale pelo WhatsApp", description: "Tire dúvidas com a nossa equipe em tempo real", href: "https://wa.me/5511998765432?text=Olá%2C%20vim%20pelo%20link%20do%20Agendamentos", icon: MessageCircle, external: true },
   { title: "Como chegar", description: "Rua das Magnólias, 248 — Jardins", href: "https://maps.google.com/?q=Rua+das+Magnolias+248+Jardins+Sao+Paulo", icon: MapPin, external: true },
-  { title: "Conheça a VisioNew", description: "Veja tratamentos, avaliações e nossa história", href: "/free-access", icon: Globe2 },
+  { title: "Conheça a Plataforma", description: "Veja serviços, avaliações e sobre o sistema", href: "/free-access", icon: Globe2 },
 ];
 
 export default function ClinicLinksPage() {
@@ -22,15 +22,15 @@ export default function ClinicLinksPage() {
       <div className="relative mx-auto flex w-full max-w-[680px] flex-col items-center">
         <div className="relative">
           <div className="size-32 overflow-hidden rounded-full border-[5px] border-white bg-zinc-200 shadow-[0_18px_45px_rgba(0,0,0,.14)] sm:size-36">
-            <Image src="/free-access/clinica-perfil.jpg" alt="VisioNew Clínica de Estética" width={144} height={144} className="h-full w-full object-cover object-[center_38%]" priority />
+            <Image src="/free-access/clinica-perfil.jpg" alt="Agendamentos — Sistema de Gestão" width={144} height={144} className="h-full w-full object-cover object-[center_38%]" priority />
           </div>
           <span className="absolute -bottom-1 -right-2 flex size-11 items-center justify-center rounded-full border-4 border-[#f4f4f5] bg-zinc-950 text-white"><Sparkles className="size-4" /></span>
         </div>
 
         <div className="mt-8 text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500">Clínica de estética</p>
-          <h1 className="mt-2 font-serif text-5xl font-medium tracking-[-0.04em] sm:text-6xl">VisioNew</h1>
-          <p className="mt-2 text-sm text-zinc-500 sm:text-base">Estética, ciência e naturalidade</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500">Sistema de Gestão & Agendamentos</p>
+          <h1 className="mt-2 font-serif text-5xl font-medium tracking-[-0.04em] sm:text-6xl">Agendamentos</h1>
+          <p className="mt-2 text-sm text-zinc-500 sm:text-base">Gestão inteligente, praticidade e eficiência</p>
           <div className="mx-auto mt-6 h-px w-20 bg-zinc-300" />
         </div>
 
@@ -52,9 +52,9 @@ export default function ClinicLinksPage() {
 
         <div className="mt-9 flex items-center gap-3">
           <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram" className="flex size-10 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-600 transition hover:border-zinc-950 hover:bg-zinc-950 hover:text-white"><Instagram className="size-4" /></a>
-          <span className="text-xs text-zinc-500">@visionewclinica</span>
+          <span className="text-xs text-zinc-500">@agendamentos</span>
         </div>
-        <p className="mt-10 text-center text-[10px] uppercase tracking-[0.15em] text-zinc-400">VisioNew Clínica · MVP demonstrativo</p>
+        <p className="mt-10 text-center text-[10px] uppercase tracking-[0.15em] text-zinc-400">Agendamentos · Sistema de Gestão</p>
       </div>
     </main>
   );

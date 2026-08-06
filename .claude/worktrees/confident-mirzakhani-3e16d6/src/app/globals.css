@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f4f4f5;
+  --foreground: #18181b;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: "Inter", "SF Pro Display", "SF Pro Text", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+::selection { background: #18181b; color: #fff; }
+
+@keyframes harmonize-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.animate-pulse {
+  background-image: linear-gradient(
+    90deg,
+    rgb(228 228 231 / 0.85) 0%,
+    rgb(244 244 245) 45%,
+    rgb(228 228 231 / 0.85) 100%
+  );
+  background-size: 200% 100%;
+  animation: harmonize-shimmer 1.4s ease-in-out infinite;
+}

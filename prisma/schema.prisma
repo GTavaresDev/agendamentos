@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String           @id @default(uuid())
+  name                 String
+  email                String           @unique
+  phone                String
+  password             String?
+  role                 String           @default("Funcionario")
+  status               String           @default("Ativo")
+  last                 String?
+  initials             String
+  failedLoginAttempts  Int              @default(0)
+  lockedUntil          DateTime?
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  appointments         Appointment[]
+  permissions          UserPermission[]
+  sales                Sale[]
+
+  @@map("Users")
+}
+
+model UserPermission {
+  id                 Int      @id @default(autoincrement())
+  name               String
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  description        String?
+  enabled            Boolean  @default(true)
+  isSystemPermission Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([userId, name])
+  @@map("UserPermissions")
+}
+
+model SystemPermission {
+  id                 Int      @id @default(autoincrement())
+  name               String   @unique
+  description        String?
+  category           String   @default("general")
+  enabled            Boolean  @default(true)
+  requiresHierarchy  Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("SystemPermissions")
+}
+
+model Product {
+  id        String   @id @default(uuid())
+  name      String
+  category  String
+  price     Float
+  quantity  Int
+  status    String   @default("Ativo")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sales     Sale[]
+
+  @@map("Products")
+}
+
+model Client {
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  phone        String
+  cpf          String?
+  birthDate    String?
+  status       String        @default("Ativo")
+  initials     String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  appointments Appointment[]
+
+  @@map("Clients")
+}
+
+model Service {
+  id           String        @id @default(uuid())
+  name         String
+  description  String?
+  duration     Int
+  price        Float?
+  status       String        @default("Ativo")
+  color        String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  appointments Appointment[]
+
+  @@map("Services")
+}
+
+model Appointment {
+  id        String   @id @default(uuid())
+  date      String
+  time      String
+  name      String
+  service   String?
+  duration  String
+  status    String   @default("Confirmado")
+  initials  String
+  channelId String
+  notes     String?
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  clientId  String?
+  client    Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  serviceId String?
+  serviceRecord Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([date])
+  @@index([status])
+  @@index([userId])
+  @@index([clientId])
+  @@index([serviceId])
+  @@map("Appointments")
+}
+
+model AppointmentChannel {
+  id      String  @id
+  name    String
+  value   Int
+  percent Float
+  digital Boolean
+
+  @@map("AppointmentChannels")
+}
+
+model Sale {
+  id            String   @id @default(uuid())
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  quantity      Int
+  unitPrice     Float
+  totalPrice    Float
+
+  paymentMethod String   @default("Dinheiro")
+
+  createdById   String?
+  createdBy     User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([productId])
+  @@index([createdById])
+  @@map("Sales")
+}

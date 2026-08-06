@@ -1,5 +1,12 @@
-import { SchedulingApp } from "@/app/(agendamentos)/_components/scheduling-app";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import { DashboardView } from "./components/dashboard-view";
 
-export default function DashboardPage() {
-  return <SchedulingApp initialView="dashboard" />;
+export default async function DashboardPage() {
+  const session = await auth();
+  if (!session?.user) {
+    redirect("/login");
+  }
+
+  return <DashboardView />;
 }
