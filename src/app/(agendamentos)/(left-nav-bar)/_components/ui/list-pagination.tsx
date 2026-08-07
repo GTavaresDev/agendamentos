@@ -3,10 +3,10 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/button";
 import {
-  getPageNumbers,
   getSafePage,
   getShowingRange,
   getTotalPages,
+  getVisiblePageNumbers,
   LIST_PAGE_SIZE,
 } from "@/lib/pagination";
 
@@ -25,10 +25,11 @@ export function ListPagination({
 }) {
   const totalPages = getTotalPages(totalItems, pageSize);
   const currentPage = getSafePage(page, totalItems, pageSize);
-  const pages = getPageNumbers(totalPages);
+  const visiblePages = getVisiblePageNumbers(currentPage, totalPages);
   const range = getShowingRange(currentPage, totalItems, pageSize);
   const canGoPrev = currentPage > 1;
   const canGoNext = currentPage < totalPages;
+  const showArrows = totalPages > 3;
 
   let showingLabel = `Mostrando 0 de ${totalItems} ${label}`;
   if (totalItems > 0) {
@@ -39,16 +40,18 @@ export function ListPagination({
     <div className="flex items-center justify-between border-t border-zinc-100 px-5 py-4 text-xs text-zinc-500">
       <span>{showingLabel}</span>
       <div className="flex gap-1">
-        <Button
-          variant="outline"
-          size="icon"
-          className="size-8"
-          disabled={!canGoPrev}
-          onClick={() => onPageChange(currentPage - 1)}
-        >
-          <ChevronLeft />
-        </Button>
-        {pages.map((pageNumber) => {
+        {showArrows && (
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-8"
+            disabled={!canGoPrev}
+            onClick={() => onPageChange(currentPage - 1)}
+          >
+            <ChevronLeft />
+          </Button>
+        )}
+        {visiblePages.map((pageNumber) => {
           let variant: "default" | "outline" = "outline";
           if (pageNumber === currentPage) {
             variant = "default";
@@ -66,15 +69,17 @@ export function ListPagination({
             </Button>
           );
         })}
-        <Button
-          variant="outline"
-          size="icon"
-          className="size-8"
-          disabled={!canGoNext}
-          onClick={() => onPageChange(currentPage + 1)}
-        >
-          <ChevronRight />
-        </Button>
+        {showArrows && (
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-8"
+            disabled={!canGoNext}
+            onClick={() => onPageChange(currentPage + 1)}
+          >
+            <ChevronRight />
+          </Button>
+        )}
       </div>
     </div>
   );

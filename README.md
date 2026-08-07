@@ -1,161 +1,124 @@
-# 🌿 Agendamentos — Gestão Inteligente & Sistema de Agendamentos
+# 🌿 Agendamentos — Sistema Integrado de Gestão & Agendamentos
 
-Plataforma SaaS completa e moderna desenvolvida para gestão de agendamentos, clientes, controle de estoque, equipe profissional e relatórios operacionais em tempo real.
+O **Agendamentos** é uma solução completa de gestão operacional e financeira projetada para clínicas de estética, consultórios de saúde e estabelecimentos de serviços com atendimento agendado. 
 
----
-
-## 🚀 Funcionalidades Principais
-
-- 📊 **Dashboard Geral**: Resumo em tempo real dos agendamentos do dia, clientes ativos, faturamento e indicadores de desempenho.
-- 📅 **Gestão de Agendamentos & Agenda**:
-  - Visualização em lista e grade diária/semanal por profissionais.
-  - Cadastro de consultas, seleção de cliente, serviço, duração e observações.
-  - Atualização dinâmica de status (Confirmado, Concluído, Cancelado).
-  - Trava configurável para agendamentos em horários passados (exclusivo Administrador).
-- 👤 **Gestão de Clientes**: Cadastro completo de clientes com histórico de procedimentos, contatos, CPF e aniversários.
-- 🛍️ **Controle de Produtos & Estoque**: Catálogo de produtos comercializados, precificação e níveis de estoque em tempo real.
-- 👥 **Gestão de Usuários & Permissões**:
-  - Perfis de acesso granulares (Administrador, Funcionário, etc.).
-  - Controle de bloqueio automático por tentativas inválidas de senha.
-  - **Modo de Visualização (Impersonation)**: Permite que administradores visualizem o sistema exatamente como qualquer usuário ou profissional da equipe.
-- 📈 **Relatórios & Gráficos**: Dashboards analíticos consolidados com gráficos de canais de captação (Digital vs. Presencial), evolução de receita e performance operacional.
+O sistema unifica em uma única plataforma a **agenda de atendimentos**, o **relacionamento com clientes**, o **controle de caixa e vendas de produtos**, a **gestão da equipe profissional** e **relatórios de inteligência de negócios**.
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## 🎯 Propósito & Objetivos do Sistema
 
-- **Framework**: [Next.js 16](https://nextjs.org/) (App Router & Server Actions)
-- **Linguagem**: [TypeScript](https://www.typescriptlang.org/)
-- **Interface & Estilização**: [Tailwind CSS v4](https://tailwindcss.com/), [Lucide React](https://lucide.dev/), Radix UI
-- **Banco de Dados**: [PostgreSQL 16](https://www.postgresql.org/)
-- **ORM**: [Prisma ORM v6](https://www.prisma.io/)
-- **Autenticação**: [NextAuth.js v5](https://authjs.dev/) (Auth.js) & `bcryptjs`
-- **Validação de Dados**: [Zod](https://zod.dev/)
-- **Gráficos**: [Recharts](https://recharts.org/)
-- **Processamento de Imagens**: [Sharp](https://sharp.pixelplumbing.com/) (Geração automatizada de favicon e banners OpenGraph)
-- **Containerização**: [Docker](https://www.docker.com/) & Docker Compose
+O objetivo principal da plataforma é eliminar falhas na agenda, automatizar o fluxo de atendimento da recepção até a sala do profissional, otimizar a venda cruzada de produtos de skincare e pós-procedimento, e fornecer ao gestor uma visão analítica em tempo real da saúde financeira da clínica.
 
 ---
 
-## 📂 Estrutura do Projeto
+## 📋 Regras de Negócio & Funcionalidades
 
-```text
-agendamentos/
-├── prisma/
-│   ├── schema.prisma       # Modelagem do banco de dados (Users, Clients, Products, Appointments)
-│   └── seed.ts             # Dados iniciais para ambiente de desenvolvimento
-├── public/                 # Recursos estáticos (Logos, favicons, banners OpenGraph)
-├── scripts/
-│   ├── generate-assets.js  # Script de geração de ícones e og:image
-│   └── seed-prod.ts        # Script de carga inicial para produção
-├── src/
-│   └── app/
-│       ├── (agendamentos)/ # Módulo autenticado com barra de navegação lateral
-│       │   └── (left-nav-bar)/
-│       │       ├── _actions/       # Server Actions (Auth, Usuários, Clientes, Agendamentos)
-│       │       ├── _components/    # Componentes e layouts da aplicação
-│       │       ├── agenda/         # Visão de calendário/grade
-│       │       ├── agendamentos/   # Listagem e edição de agendamentos
-│       │       ├── clientes/       # Gestão de clientes
-│       │       ├── dashboard/      # Painel inicial
-│       │       ├── produtos/       # Gestão de produtos
-│       │       ├── relatorios/     # Dashboards analíticos
-│       │       └── usuarios/       # Gestão de equipe e usuários
-│       ├── (free-access)/  # Páginas públicas sem necessidade de login (/links, /site)
-│       ├── login/          # Tela de autenticação
-│       └── layout.tsx      # Root Layout com configurações de SEO, OpenGraph e Favicon
-├── docker-compose.yml      # Configuração do container PostgreSQL
-└── package.json
+### 1. 📅 Gestão de Agenda & Atendimentos
+- **Grade Horária Flexível**: Visualização em lista e em grade por profissional da equipe, respeitando o tempo de duração individual de cada procedimento (ex: Consulta Inicial 30min, Botox 45min, Harmonização 90min).
+- **Ciclo de Vida do Agendamento**:
+  - `Pendente`: Agendamento pré-reservado aguardando confirmação.
+  - `Confirmado`: Cliente confirmou presença pelo canal de atendimento.
+  - `Concluído`: Procedimento realizado com sucesso (alimenta automaticamente a receita e relatórios).
+  - `Cancelado`: Horário liberado na grade para novos encaixes.
+- **Canais de Origem (Captação)**: Todo agendamento é categorizado pela sua origem (`Digital`, `WhatsApp`, `Presencial` ou `Telefone`), permitindo medir o retorno dos canais de atendimento.
+- **Controle de Bloqueio Retroativo**: Proteção contra alteração ou marcação de consultas em horários passados, garantindo a integridade dos dados históricos (recurso ajustável por administradores).
+
+---
+
+### 2. 👤 Relacionamento & Cadastro de Clientes
+- **Prontuário Unificado**: Ficha completa do cliente contendo dados de contato, CPF, data de nascimento e cálculo automático de iniciais para identificação visual rápida.
+- **Histórico Consolidado**: Visualização centralizada de todos os atendimentos passados do cliente, serviços realizados e produtos adquiridos no balcão.
+- **Indicadores de Retenção**: Identificação de clientes recorrentes versus novos clientes para estratégias de fidelização.
+
+---
+
+### 3. 🛍️ Vendas de Produtos & Checkout de Balcão
+- **Catálogo de Produtos**: Controle de itens comercializados (ex: Séruns, Protetores Solares, Kits Pós-Procedimento, Sabonetes Faciais) categorizados e precificados.
+- **Venda Cruzada Pós-Atendimento**: Permite que a recepção ou o próprio profissional registrem a venda de produtos recomendados logo após a conclusão do procedimento.
+- **Formas de Pagamento & Caixas**: Suporte a múltiplos métodos de pagamento (`Pix`, `Cartão de Crédito`, `Cartão de Débito` e `Dinheiro`), com cálculo de ticket médio e totalização por período.
+- **Controle de Estoque**: Baixa e acompanhamento de quantidades disponíveis em estoque.
+
+---
+
+### 4. 👥 Gestão de Equipe & Controle de Acesso
+- **Perfis de Acesso Granulares**:
+  - `Administrador`: Acesso total a todas as configurações, trava de agenda, gerenciamento de equipe e DRE.
+  - `Gestor`: Acesso completo aos relatórios de faturamento, vendas e dashboards operacionais.
+  - `Esteticista / Profissional`: Foco na visualização e execução da própria agenda de atendimentos.
+  - `Funcionário / Recepção`: Acesso ao agendamento de consultas, cadastro de clientes e checkout de vendas.
+- **Permissões Customizáveis**: Controle dinâmico de permissões especiais (como `ver_relatorios` e `compartilhar_permissoes`).
+- **Segurança de Acesso**: Bloqueio temporário de segurança após múltiplas tentativas inválidas de login para proteção dos dados da clínica.
+
+---
+
+### 5. 📈 Inteligência Analítica & Relatórios (DRE)
+- **Faturamento e Receita em Tempo Real**: Métricas atualizadas automaticamente de faturamento total, ticket médio e volume de procedimentos executados.
+- **Mapa de Calor de Ocupação Semanal**: Gráfico intuitivo mostrando os dias e horários de maior e menor movimento na clínica, orientando campanhas de promoção para horários ociosos.
+- **Ranking de Serviços & Produtos**: Identificação dos procedimentos mais procurados e dos produtos mais vendidos.
+- **Produtividade da Equipe**: Análise individual da carga de trabalho e faturamento gerado por cada profissional da clínica.
+
+---
+
+## 💡 Fluxos Operacionais no Dia a Dia
+
+```mermaid
+flowchart LR
+    A[Cliente entra em contato] --> B{Canal: WhatsApp / Digital / Presencial}
+    B --> C[Recepção realiza Agendamento]
+    C --> D[Status: Confirmado]
+    D --> E[Profissional realiza Procedimento]
+    E --> F[Status: Concluído]
+    F --> G[Recepção oferece Kit Pós-Procedimento]
+    G --> H[Registro da Venda no Balcão]
+    H --> I[Atualização Automática dos Relatórios & DRE]
 ```
 
 ---
 
-## ⚙️ Pré-requisitos & Configuração (.env)
+## 🧪 Ambiente de Demonstração & Apresentação a Clientes
 
-Antes de iniciar, certifique-se de ter instalado em sua máquina:
-- **Node.js** (v20 ou superior)
-- **npm**, **yarn** ou **pnpm**
-- **Docker** e **Docker Compose** (para executar o banco PostgreSQL localmente)
+Para apresentações comerciais e validação do sistema, o projeto conta com um gerador de dados realistas cobrindo os **últimos 3 meses** de operação de uma clínica ativa:
 
-Crie um arquivo `.env` na raiz do projeto baseado no `.env.exemple`:
+- **50 Clientes cadastrados** com nomes e contatos brasileiros realistas.
+- **250+ Agendamentos** distribuídos com horários de pico, durações reais e status atualizados.
+- **260+ Vendas de produtos** registradas com diferentes métodos de pagamento (Pix, Cartão, Dinheiro).
+- **8 Serviços e 7 Produtos** no catálogo com movimentação e relatórios completos.
 
-```env
-DATABASE_URL="postgresql://postgres:postgres@localhost:5436/agendamentos_db?schema=public"
-AUTH_SECRET="sua_chave_secreta_para_next_auth"
-MASTER_ADMIN_USER_ID="admin@agendamentos"
-MASTER_ADMIN_PASSWORD="sua_senha_master"
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
-```
+### Credenciais Padrão de Acesso (Demonstração):
+- **Administrador**: `admin@agendamentos.com` | **Senha**: `zxcasd`
+- **Profissional / Gabriel**: `gabriel@agendamentos.com` | **Senha**: `lkjh-poiu-zxc10`
 
 ---
 
-## 🛠️ Passo a Passo para Execução Local
+## 🚀 Instalação Rápida
 
-### 1. Clonar o repositório e instalar dependências
-
+### 1. Clonar e Instalar Dependências
 ```bash
-git clone https://github.com/usuario/agendamentos.git
+git clone https://github.com/GTavaresDev/agendamentos.git
 cd agendamentos
 npm install
 ```
 
-### 2. Subir o Banco de Dados com Docker
-
+### 2. Iniciar Banco de Dados Local (Docker) & Gerar Dados de Teste
 ```bash
 docker compose up -d
-```
-
-### 3. Rodar as Migrações e o Seed do Prisma
-
-```bash
-# Executa as migrations para criar as tabelas no PostgreSQL
 npx prisma migrate dev
-
-# Executa o seed para popular o banco com dados de teste
 npm run db:seed
 ```
 
-### 4. Iniciar o Servidor de Desenvolvimento
-
+### 3. Iniciar a Aplicação
 ```bash
 npm run dev
 ```
-
-Abra o seu navegador em [http://localhost:3000](http://localhost:3000).
-
----
-
-## 🔐 Credenciais Padrão para Teste (Seed)
-
-Após executar o comando `npm run db:seed`, utilize as seguintes credenciais para acessar o ambiente local:
-
-- **Administrador**: `admin@agendamentos.com` | **Senha**: `zxcasd`
-- **Funcionário**: `gabriel@agendamentos.com` | **Senha**: `lkjh-poiu-zxc10`
+Acesse [http://localhost:3000](http://localhost:3000) no seu navegador.
 
 ---
 
-## 📜 Scripts Disponíveis
+## ⚙️ Tecnologias Principais (Resumo)
 
-No arquivo `package.json`, estão disponíveis os seguintes comandos:
-
-| Comando | Descrição |
-| :--- | :--- |
-| `npm run dev` | Inicia o ambiente de desenvolvimento local na porta 3000 |
-| `npm run build` | Compila o projeto para produção utilizando Webpack |
-| `npm run start` | Inicia o servidor Next.js em modo de produção |
-| `npm run lint` | Executa o linter do ESLint para análise estática de código |
-| `npm run db:seed` | Executa a carga inicial de dados fictícios para desenvolvimento |
-| `npm run db:seed:prod` | Executa a carga inicial de dados essenciais para ambiente de produção |
-
----
-
-## 🌐 Deploy
-
-O projeto está otimizado para deploy em plataformas Serverless como a **Vercel**:
-
-1. Conecte o repositório na Vercel.
-2. Configure as variáveis de ambiente (`DATABASE_URL`, `AUTH_SECRET`, `NEXT_PUBLIC_APP_URL`).
-3. Certifique-se de que o banco PostgreSQL de produção esteja acessível via string de conexão.
+- **Front-end / Framework**: Next.js 16 (App Router), React 19, Tailwind CSS v4, Lucide Icons, Recharts.
+- **Back-end & Banco de Dados**: Node.js, Prisma ORM v6, PostgreSQL 16, NextAuth.js v5.
 
 ---
 

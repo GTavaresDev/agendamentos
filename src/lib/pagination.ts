@@ -43,6 +43,25 @@ export function getPageNumbers(totalPages: number): number[] {
   return Array.from({ length: totalPages }, (_, index) => index + 1);
 }
 
+export function getVisiblePageNumbers(
+  currentPage: number,
+  totalPages: number,
+): number[] {
+  if (totalPages <= 3) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  let startPage = currentPage - 1;
+  if (startPage < 1) {
+    startPage = 1;
+  }
+  if (startPage + 2 > totalPages) {
+    startPage = totalPages - 2;
+  }
+
+  return [startPage, startPage + 1, startPage + 2];
+}
+
 export function getShowingRange(
   page: number,
   totalItems: number,
