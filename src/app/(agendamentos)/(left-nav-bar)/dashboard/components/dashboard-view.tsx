@@ -156,56 +156,60 @@ export function DashboardView() {
           <h2 className="mb-2.5 text-sm sm:text-base font-semibold tracking-tight text-zinc-950">
             Começar
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-4 gap-2 sm:gap-4">
             <button
               type="button"
               onClick={onNew}
-              className="group @container/action flex flex-col items-center justify-center rounded-2xl border border-zinc-200/80 bg-white p-[clamp(0.75rem,4.5cqw,1.25rem)] text-center shadow-xs transition-all hover:border-zinc-300 hover:bg-zinc-50/60 hover:shadow-md active:scale-[0.98] min-h-[105px] sm:min-h-[125px] h-full"
+              className="group flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-zinc-200/80 bg-white p-2 sm:p-4 text-center shadow-xs transition-all hover:border-zinc-300 hover:bg-zinc-50/60 hover:shadow-md active:scale-[0.98] min-h-[85px] sm:min-h-[125px] h-full"
             >
-              <div className="flex size-[clamp(2.25rem,9cqw,3rem)] items-center justify-center rounded-xl bg-zinc-100 text-zinc-900 transition-transform group-hover:scale-105">
-                <Plus className="size-[clamp(1.125rem,4.5cqw,1.5rem)] stroke-[2]" />
+              <div className="flex size-8 sm:size-12 items-center justify-center rounded-lg sm:rounded-xl bg-zinc-100 text-zinc-900 transition-transform group-hover:scale-105">
+                <Plus className="size-4 sm:size-6 stroke-[2]" />
               </div>
-              <span className="mt-[clamp(0.375rem,2.5cqw,0.75rem)] text-[clamp(0.6875rem,3.2cqw,0.875rem)] font-semibold text-zinc-900 leading-tight text-center whitespace-nowrap overflow-hidden text-ellipsis w-full">
-                Novo agendamento
+              <span className="mt-1.5 sm:mt-3 text-[11px] sm:text-xs font-semibold text-zinc-900 leading-tight text-center w-full">
+                <span className="sm:hidden">Agendar</span>
+                <span className="hidden sm:inline">Novo agendamento</span>
               </span>
             </button>
 
             <button
               type="button"
               onClick={onVerAgenda}
-              className="group @container/action flex flex-col items-center justify-center rounded-2xl border border-zinc-200/80 bg-white p-[clamp(0.75rem,4.5cqw,1.25rem)] text-center shadow-xs transition-all hover:border-zinc-300 hover:bg-zinc-50/60 hover:shadow-md active:scale-[0.98] min-h-[105px] sm:min-h-[125px] h-full"
+              className="group flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-zinc-200/80 bg-white p-2 sm:p-4 text-center shadow-xs transition-all hover:border-zinc-300 hover:bg-zinc-50/60 hover:shadow-md active:scale-[0.98] min-h-[85px] sm:min-h-[125px] h-full"
             >
-              <div className="flex size-[clamp(2.25rem,9cqw,3rem)] items-center justify-center rounded-xl bg-zinc-100 text-zinc-900 transition-transform group-hover:scale-105">
-                <CalendarDays className="size-[clamp(1.125rem,4.5cqw,1.5rem)] stroke-[1.75]" />
+              <div className="flex size-8 sm:size-12 items-center justify-center rounded-lg sm:rounded-xl bg-zinc-100 text-zinc-900 transition-transform group-hover:scale-105">
+                <CalendarDays className="size-4 sm:size-6 stroke-[1.75]" />
               </div>
-              <span className="mt-[clamp(0.375rem,2.5cqw,0.75rem)] text-[clamp(0.6875rem,3.2cqw,0.875rem)] font-semibold text-zinc-900 leading-tight text-center whitespace-nowrap overflow-hidden text-ellipsis w-full">
-                Ver agenda completa
+              <span className="mt-1.5 sm:mt-3 text-[11px] sm:text-xs font-semibold text-zinc-900 leading-tight text-center w-full">
+                <span className="sm:hidden">Agenda</span>
+                <span className="hidden sm:inline">Ver agenda completa</span>
               </span>
             </button>
 
             <button
               type="button"
               onClick={() => router.push("/clientes?novo=1")}
-              className="group @container/action flex flex-col items-center justify-center rounded-2xl border border-zinc-200/80 bg-white p-[clamp(0.75rem,4.5cqw,1.25rem)] text-center shadow-xs transition-all hover:border-zinc-300 hover:bg-zinc-50/60 hover:shadow-md active:scale-[0.98] min-h-[105px] sm:min-h-[125px] h-full"
+              className="group flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-zinc-200/80 bg-white p-2 sm:p-4 text-center shadow-xs transition-all hover:border-zinc-300 hover:bg-zinc-50/60 hover:shadow-md active:scale-[0.98] min-h-[85px] sm:min-h-[125px] h-full"
             >
-              <div className="flex size-[clamp(2.25rem,9cqw,3rem)] items-center justify-center rounded-xl bg-zinc-100 text-zinc-900 transition-transform group-hover:scale-105">
-                <UserCheck className="size-[clamp(1.125rem,4.5cqw,1.5rem)] stroke-[1.75]" />
+              <div className="flex size-8 sm:size-12 items-center justify-center rounded-lg sm:rounded-xl bg-zinc-100 text-zinc-900 transition-transform group-hover:scale-105">
+                <UserCheck className="size-4 sm:size-6 stroke-[1.75]" />
               </div>
-              <span className="mt-[clamp(0.375rem,2.5cqw,0.75rem)] text-[clamp(0.6875rem,3.2cqw,0.875rem)] font-semibold text-zinc-900 leading-tight text-center whitespace-nowrap overflow-hidden text-ellipsis w-full">
-                Cadastrar cliente
+              <span className="mt-1.5 sm:mt-3 text-[11px] sm:text-xs font-semibold text-zinc-900 leading-tight text-center w-full">
+                <span className="sm:hidden">Clientes</span>
+                <span className="hidden sm:inline">Cadastrar cliente</span>
               </span>
             </button>
 
             <button
               type="button"
               onClick={() => router.push("/vendas?novo=1")}
-              className="group @container/action flex flex-col items-center justify-center rounded-2xl border border-zinc-200/80 bg-white p-[clamp(0.75rem,4.5cqw,1.25rem)] text-center shadow-xs transition-all hover:border-zinc-300 hover:bg-zinc-50/60 hover:shadow-md active:scale-[0.98] min-h-[105px] sm:min-h-[125px] h-full"
+              className="group flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-zinc-200/80 bg-white p-2 sm:p-4 text-center shadow-xs transition-all hover:border-zinc-300 hover:bg-zinc-50/60 hover:shadow-md active:scale-[0.98] min-h-[85px] sm:min-h-[125px] h-full"
             >
-              <div className="flex size-[clamp(2.25rem,9cqw,3rem)] items-center justify-center rounded-xl bg-zinc-100 text-zinc-900 transition-transform group-hover:scale-105">
-                <ShoppingCart className="size-[clamp(1.125rem,4.5cqw,1.5rem)] stroke-[1.75]" />
+              <div className="flex size-8 sm:size-12 items-center justify-center rounded-lg sm:rounded-xl bg-zinc-100 text-zinc-900 transition-transform group-hover:scale-105">
+                <ShoppingCart className="size-4 sm:size-6 stroke-[1.75]" />
               </div>
-              <span className="mt-[clamp(0.375rem,2.5cqw,0.75rem)] text-[clamp(0.6875rem,3.2cqw,0.875rem)] font-semibold text-zinc-900 leading-tight text-center whitespace-nowrap overflow-hidden text-ellipsis w-full">
-                Registrar venda
+              <span className="mt-1.5 sm:mt-3 text-[11px] sm:text-xs font-semibold text-zinc-900 leading-tight text-center w-full">
+                <span className="sm:hidden">Vendas</span>
+                <span className="hidden sm:inline">Registrar venda</span>
               </span>
             </button>
           </div>
