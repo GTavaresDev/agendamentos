@@ -11,7 +11,7 @@ import {
   formatFriendlyDate,
   getStatusBadgeVariant,
 } from "../../../_components/portal-format";
-import { PortalShell, requirePortalSession } from "../../../_components/portal-shell";
+import { PortalShell, requireCompletePortalSession } from "../../../_components/portal-shell";
 
 export const metadata: Metadata = {
   title: "Detalhes do agendamento",
@@ -22,7 +22,7 @@ export default async function AppointmentDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const session = await requirePortalSession();
+  const session = await requireCompletePortalSession();
   const { id } = await params;
 
   // A consulta filtra por cliente autenticado: id de outra pessoa vira 404.

@@ -2,6 +2,7 @@ import { CreateAppointment } from "@core/application/appointments/create-appoint
 import { durationLabelFromMinutes } from "@core/domain/appointments/appointment-duration";
 import { AppointmentRepository } from "@core/domain/appointments/appointment.repository";
 import { findAvailableStartTimes } from "@core/domain/appointments/availability.business-rule";
+import { isClientProfileComplete } from "@core/domain/clients/client-profile.business-rule";
 import { ClientRepository } from "@core/domain/clients/client.repository";
 import { ServiceRepository } from "@core/domain/services/service.repository";
 import { UserRepository } from "@core/domain/users/user.repository";
@@ -47,6 +48,14 @@ export class BookClientAppointment {
     const client = await this.clientRepository.findById(input.clientId);
     if (!client || client.status !== "Ativo") {
       throw new BookingError("Sua conta não está ativa. Entre em contato com a clínica.");
+    }
+
+    // A tela já bloqueia, mas a trava real é esta: cadastro incompleto não
+    // agenda, venha a requisição de onde vier.
+    if (!isClientProfileComplete({ phone: client.phone, birthDate: client.birthDate }, now)) {
+      throw new BookingError(
+        "Complete seu cadastro antes de agendar.",
+      );
     }
 
     const service = await this.serviceRepository.findById(input.serviceId);

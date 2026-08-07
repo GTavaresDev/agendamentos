@@ -1,11 +1,21 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi, type Mocked } from "vitest";
 import { buildClient, mockClientRepository } from "@core/application/clients/test-helpers";
-import { hashPassword } from "@core/infra/auth/password";
+import type { ClientOAuthAccountRepository } from "@core/domain/clients/client-oauth-account.repository";
+import { hashPassword, verifyPassword } from "@core/infra/auth/password";
 import {
   AuthenticateClient,
   ClientAccountError,
   RegisterClientAccount,
+  SetClientPassword,
 } from "./client-account.usecase";
+
+function oauthAccountsLinkedToGoogle(linked: boolean): Mocked<ClientOAuthAccountRepository> {
+  return {
+    findClientIdByProviderAccount: vi.fn().mockResolvedValue(null),
+    hasLink: vi.fn().mockResolvedValue(linked),
+    link: vi.fn(),
+  } as unknown as Mocked<ClientOAuthAccountRepository>;
+}
 
 const input = {
   name: "Maria Silva",
@@ -69,6 +79,21 @@ describe("RegisterClientAccount", () => {
     await expect(new RegisterClientAccount(repo).execute(input)).rejects.toThrow(
       /já possui uma conta/i,
     );
+  });
+
+  // TESTE 3 — conta criada primeiro pelo Google, cadastro manual depois
+  it("não duplica conta criada pelo Google: manda entrar pelo Google", async () => {
+    const repo = mockClientRepository();
+    repo.findByEmail.mockResolvedValue(
+      buildClient({ id: "c1", email: "maria@example.com", phone: "", password: null }),
+    );
+
+    await expect(
+      new RegisterClientAccount(repo, oauthAccountsLinkedToGoogle(true)).execute(input),
+    ).rejects.toThrow(/Continuar com Google/i);
+
+    expect(repo.save).not.toHaveBeenCalled();
+    expect(repo.update).not.toHaveBeenCalled();
   });
 
   it("recusa senha curta", async () => {
@@ -149,5 +174,54 @@ describe("AuthenticateClient", () => {
     await expect(
       new AuthenticateClient(repo).execute("maria@example.com", "senha-super-secreta"),
     ).rejects.toThrow(/inativa/i);
+  });
+});
+
+describe("SetClientPassword", () => {
+  it("define a senha de quem entrou pelo Google, mantendo a mesma conta", async () => {
+    const repo = mockClientRepository();
+    const client = buildClient({ id: "abc123", password: null });
+    repo.findById.mockResolvedValue(client);
+
+    await new SetClientPassword(repo).execute("abc123", "senha-super-secreta");
+
+    expect(repo.update).toHaveBeenCalledTimes(1);
+    expect(repo.save).not.toHaveBeenCalled();
+    expect(client.id).toBe("abc123");
+    expect(await verifyPassword("senha-super-secreta", client.password!)).toBe(true);
+  });
+
+  it("não troca senha existente sem provar posse", async () => {
+    const repo = mockClientRepository();
+    repo.findById.mockResolvedValue(buildClient({ password: "$2a$12$hash" }));
+
+    await expect(
+      new SetClientPassword(repo).execute("abc123", "outra-senha-longa"),
+    ).rejects.toBeInstanceOf(ClientAccountError);
+    expect(repo.update).not.toHaveBeenCalled();
+  });
+
+  it("recusa cliente inativo e cliente inexistente", async () => {
+    const repo = mockClientRepository();
+    repo.findById.mockResolvedValue(buildClient({ status: "Inativo", password: null }));
+    await expect(
+      new SetClientPassword(repo).execute("abc123", "senha-super-secreta"),
+    ).rejects.toBeInstanceOf(ClientAccountError);
+
+    repo.findById.mockResolvedValue(null);
+    await expect(
+      new SetClientPassword(repo).execute("sumiu", "senha-super-secreta"),
+    ).rejects.toBeInstanceOf(ClientAccountError);
+    expect(repo.update).not.toHaveBeenCalled();
+  });
+
+  it("recusa senha curta", async () => {
+    const repo = mockClientRepository();
+    repo.findById.mockResolvedValue(buildClient({ password: null }));
+
+    await expect(
+      new SetClientPassword(repo).execute("abc123", "123"),
+    ).rejects.toThrow(/pelo menos 8/i);
+    expect(repo.update).not.toHaveBeenCalled();
   });
 });

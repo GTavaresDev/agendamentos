@@ -10,14 +10,14 @@ import {
   formatDate,
   getStatusBadgeVariant,
 } from "../../_components/portal-format";
-import { PortalShell, requirePortalSession } from "../../_components/portal-shell";
+import { PortalShell, requireCompletePortalSession } from "../../_components/portal-shell";
 
 export const metadata: Metadata = {
   title: "Meus agendamentos",
 };
 
 export default async function MyAppointmentsPage() {
-  const session = await requirePortalSession();
+  const session = await requireCompletePortalSession();
   const { upcoming, past } = await getClientAppointmentsAction();
 
   return (

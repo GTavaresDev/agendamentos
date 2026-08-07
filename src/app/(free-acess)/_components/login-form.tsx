@@ -1,15 +1,21 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/button";
 import { FieldLabel } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/field-label";
 import { Input } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/input";
 import { loginClientAction } from "../_actions/portal-auth-actions";
+import { resetPasswordNudge } from "./password-nudge";
 
 export function LoginForm() {
   const router = useRouter();
+
+  // Estar nesta tela significa que não há sessão: o próximo login recomeça do
+  // zero, inclusive o convite de criar senha que tenha sido dispensado antes.
+  useEffect(resetPasswordNudge, []);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);

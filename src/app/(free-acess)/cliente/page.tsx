@@ -1,8 +1,14 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { CalendarPlus, ChevronRight, Clock, ListChecks, UserRound } from "lucide-react";
 import { Badge } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/badge";
 import { Button } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/button";
 import { getClientAppointmentsAction } from "../_actions/portal-appointment-actions";
+import { getClientAccountStatusAction } from "../_actions/portal-auth-actions";
+import { getClientProfileStatusAction } from "../_actions/portal-profile-actions";
+import { CompleteProfileForm } from "../_components/complete-profile-form";
+import { PASSWORD_NUDGE_COOKIE } from "../_components/password-nudge";
+import { SetPasswordCard } from "../_components/set-password-card";
 import {
   clientStatusLabel,
   firstName,
@@ -14,7 +20,32 @@ import { PortalShell, requirePortalSession } from "../_components/portal-shell";
 
 export default async function ClientHomePage() {
   const session = await requirePortalSession();
-  const { next } = await getClientAppointmentsAction();
+  const profile = await getClientProfileStatusAction();
+
+  // Cadastro incompleto: nada do portal é montado — nem agendamentos, nem
+  // navegação. O formulário ocupa o lugar do conteúdo.
+  if (!profile.complete) {
+    return (
+      <PortalShell
+        session={session}
+        locked
+        title="Complete seu cadastro"
+        subtitle="Faltam alguns dados para liberar seus agendamentos."
+      >
+        <CompleteProfileForm profile={profile} />
+      </PortalShell>
+    );
+  }
+
+  const [{ next }, { hasPassword }, cookieStore] = await Promise.all([
+    getClientAppointmentsAction(),
+    getClientAccountStatusAction(),
+    cookies(),
+  ]);
+
+  // Decidido no servidor: dispensado não vem no HTML, então não pisca.
+  const showPasswordNudge =
+    !hasPassword && cookieStore.get(PASSWORD_NUDGE_COOKIE)?.value !== "1";
 
   return (
     <PortalShell
@@ -34,6 +65,9 @@ export default async function ClientHomePage() {
           </Link>
         </Button>
       </section>
+
+      {/* Flutuante: fica no canto, fora do fluxo do conteúdo. */}
+      {showPasswordNudge ? <SetPasswordCard /> : null}
 
       <section className="mt-8">
         <h2 className="mb-3 text-sm font-semibold text-zinc-700">Seu próximo atendimento</h2>

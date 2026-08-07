@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Avatar } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/avatar";
 import { AgendamentosLogo } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/agendamentos-logo";
 import { getClientSession, type ClientSession } from "@/lib/client-session";
+import { getClientProfileStatusAction } from "../_actions/portal-profile-actions";
 
 /**
  * Guarda das páginas do portal. O middleware já redireciona, mas cada página
@@ -12,6 +13,23 @@ export async function requirePortalSession(): Promise<ClientSession> {
   const session = await getClientSession();
   if (!session) {
     redirect("/cliente/login");
+  }
+  return session;
+}
+
+/**
+ * Guarda das páginas internas do portal. Além da sessão, exige cadastro
+ * completo: sem telefone e data de nascimento, tudo volta para `/cliente`,
+ * que mostra o formulário de conclusão no lugar do conteúdo.
+ *
+ * Isto é conveniência de navegação — a barreira que vale é a das use cases
+ * (BookClientAppointment recusa cadastro incompleto).
+ */
+export async function requireCompletePortalSession(): Promise<ClientSession> {
+  const session = await requirePortalSession();
+  const { complete } = await getClientProfileStatusAction();
+  if (!complete) {
+    redirect("/cliente");
   }
   return session;
 }
@@ -27,11 +45,14 @@ export function PortalShell({
   session,
   title,
   subtitle,
+  locked = false,
   children,
 }: {
   session: ClientSession;
   title?: string;
   subtitle?: string;
+  /** Cadastro incompleto: esconde a navegação, já que tudo redireciona de volta. */
+  locked?: boolean;
   children: React.ReactNode;
 }) {
   const headerTitle = title ?? `Olá, ${firstName(session.name)}!`;
@@ -48,11 +69,15 @@ export function PortalShell({
           </Link>
         </div>
 
-        <div className="mt-3 px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
-          Menu principal
-        </div>
+        {locked ? null : (
+          <>
+            <div className="mt-3 px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
+              Menu principal
+            </div>
 
-        <PortalNav variant="sidebar" className="mt-3 space-y-1" />
+            <PortalNav variant="sidebar" className="mt-3 space-y-1" />
+          </>
+        )}
 
         <div className="mt-auto space-y-1">
           <div className="my-2 h-px bg-zinc-100" />
@@ -111,10 +136,12 @@ export function PortalShell({
       </div>
 
       {/* Barra Inferior Mobile */}
-      <PortalNav
-        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-3 border-t border-zinc-200 bg-white px-2 py-2 lg:hidden"
-        variant="bar"
-      />
+      {locked ? null : (
+        <PortalNav
+          className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-3 border-t border-zinc-200 bg-white px-2 py-2 lg:hidden"
+          variant="bar"
+        />
+      )}
     </div>
   );
 }

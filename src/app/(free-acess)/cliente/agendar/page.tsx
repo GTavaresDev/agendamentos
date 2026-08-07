@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { getBookableServicesAction } from "../../_actions/portal-booking-actions";
 import { BookingWizard } from "../../_components/booking-wizard";
-import { PortalShell, requirePortalSession } from "../../_components/portal-shell";
+import { PortalShell, requireCompletePortalSession } from "../../_components/portal-shell";
 
 export const metadata: Metadata = {
   title: "Agendar",
 };
 
 export default async function BookingPage() {
-  const session = await requirePortalSession();
+  const session = await requireCompletePortalSession();
   // Serviços chegam sem preço: o DTO do portal não carrega valores.
   const services = await getBookableServicesAction();
 

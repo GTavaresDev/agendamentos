@@ -122,6 +122,26 @@ describe("BookClientAppointment", () => {
     await expect(context.useCase.execute(request)).rejects.toThrow(/não está ativa/);
   });
 
+  it("recusa cadastro incompleto mesmo se a requisição pular a tela", async () => {
+    context.clients.findById.mockResolvedValue(
+      buildClient({ id: "c1", phone: "", birthDate: "" }),
+    );
+
+    await expect(context.useCase.execute(request)).rejects.toThrow(
+      /Complete seu cadastro/i,
+    );
+    expect(context.appointments.save).not.toHaveBeenCalled();
+  });
+
+  it("recusa quem tem telefone mas nunca informou o nascimento", async () => {
+    context.clients.findById.mockResolvedValue(
+      buildClient({ id: "c1", phone: "11994279139", birthDate: "" }),
+    );
+
+    await expect(context.useCase.execute(request)).rejects.toBeInstanceOf(BookingError);
+    expect(context.appointments.save).not.toHaveBeenCalled();
+  });
+
   it("recusa quando o próprio cliente já tem atendimento no horário", async () => {
     context.appointments.findByDate.mockResolvedValue([
       buildAppointment({

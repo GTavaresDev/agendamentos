@@ -8,6 +8,8 @@ export function buildClient(overrides: Partial<ClientProps> = {}): Client {
     name: "Maria Silva",
     email: "maria@example.com",
     phone: "11999999999",
+    // Cadastro completo por padrão; testes de bloqueio sobrescrevem.
+    birthDate: "1995-01-15",
     ...overrides,
   });
 }

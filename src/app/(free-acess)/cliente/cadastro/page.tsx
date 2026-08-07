@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AuthShell } from "../../_components/auth-shell";
+import { GoogleSignIn } from "../../_components/google-sign-in";
 import { RegisterForm } from "../../_components/register-form";
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default function ClientSignUpPage() {
       }
     >
       <RegisterForm />
+      <GoogleSignIn label="Cadastrar com Google" />
     </AuthShell>
   );
 }

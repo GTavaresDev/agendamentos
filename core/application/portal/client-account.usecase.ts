@@ -1,3 +1,7 @@
+import {
+  GOOGLE_PROVIDER,
+  type ClientOAuthAccountRepository,
+} from "@core/domain/clients/client-oauth-account.repository";
 import { Client } from "@core/domain/clients/client.entity";
 import { ClientRepository } from "@core/domain/clients/client.repository";
 import { hashPassword, verifyPassword } from "@core/infra/auth/password";
@@ -19,12 +23,17 @@ export interface ClientAccountDTO {
   initials: string;
 }
 
-function normalizeEmail(email: string): string {
+/** Comparação de e-mail é sempre normalizada: sem espaços e em minúsculas. */
+export function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
 function onlyDigits(value: string): string {
   return value.replace(/\D/g, "");
+}
+
+export function toClientAccountDTO(client: Client): ClientAccountDTO {
+  return toDTO(client);
 }
 
 function toDTO(client: Client): ClientAccountDTO {
@@ -50,9 +59,16 @@ export interface RegisterClientAccountInput {
  * (registro sem senha), a conta é vinculada ao registro existente — desde que
  * o telefone informado confira, para que ninguém assuma o cadastro alheio só
  * conhecendo o e-mail.
+ *
+ * O mesmo vale para quem entrou primeiro pelo Google: o cadastro manual não
+ * cria uma segunda conta nem deixa definir senha por fora. A senha se define
+ * dentro do portal, já autenticado (SetClientPassword).
  */
 export class RegisterClientAccount {
-  constructor(private clientRepository: ClientRepository) {}
+  constructor(
+    private clientRepository: ClientRepository,
+    private oauthAccountRepository?: ClientOAuthAccountRepository,
+  ) {}
 
   async execute(input: RegisterClientAccountInput): Promise<ClientAccountDTO> {
     const email = normalizeEmail(input.email);
@@ -84,6 +100,16 @@ export class RegisterClientAccount {
         );
       }
 
+      const linkedToGoogle = await this.oauthAccountRepository?.hasLink(
+        existing.id,
+        GOOGLE_PROVIDER,
+      );
+      if (linkedToGoogle) {
+        throw new ClientAccountError(
+          'Este e-mail já está cadastrado com o Google. Use "Continuar com Google" para entrar.',
+        );
+      }
+
       if (onlyDigits(existing.phone) !== onlyDigits(phone)) {
         throw new ClientAccountError(
           "Não foi possível concluir o cadastro. Confira seus dados ou entre em contato com a clínica.",
@@ -105,6 +131,40 @@ export class RegisterClientAccount {
 
     await this.clientRepository.save(client);
     return toDTO(client);
+  }
+}
+
+/**
+ * Define a senha de quem entrou primeiro pelo Google (ou foi cadastrado pela
+ * clínica) e agora quer também o login por e-mail/senha.
+ *
+ * O clientId vem SEMPRE da sessão — nunca do navegador. Quem já tem senha usa
+ * a recuperação de senha; aqui não se troca senha existente sem provar posse.
+ */
+export class SetClientPassword {
+  constructor(private clientRepository: ClientRepository) {}
+
+  async execute(clientId: string, password: string): Promise<void> {
+    const client = await this.clientRepository.findById(clientId);
+
+    if (!client || client.status !== "Ativo") {
+      throw new ClientAccountError("Não foi possível definir sua senha.");
+    }
+
+    if (client.password) {
+      throw new ClientAccountError(
+        "Esta conta já tem senha. Use a recuperação de senha para trocá-la.",
+      );
+    }
+
+    if (password.length < MIN_CLIENT_PASSWORD_LENGTH) {
+      throw new ClientAccountError(
+        `A senha deve ter pelo menos ${MIN_CLIENT_PASSWORD_LENGTH} caracteres.`,
+      );
+    }
+
+    client.setPassword(await hashPassword(password));
+    await this.clientRepository.update(client);
   }
 }
 

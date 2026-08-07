@@ -1,5 +1,6 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import {
@@ -7,17 +8,23 @@ import {
   ClientAccountError,
   MIN_CLIENT_PASSWORD_LENGTH,
   RegisterClientAccount,
+  SetClientPassword,
 } from "@core/application/portal/client-account.usecase";
+import { PrismaClientOAuthAccountRepository } from "@core/infra/persistence/prisma/repositories/prisma-client-oauth-account.repository";
 import { PrismaClientRepository } from "@core/infra/persistence/prisma/repositories/prisma-client.repository";
 import { formatActionError } from "@/lib/action-error-handler";
 import {
   createClientSession,
   destroyClientSession,
   getClientSession,
+  requireClientSession,
   type ClientSession,
 } from "@/lib/client-session";
+import { PORTAL_HOME_PATH, signIn as portalSignIn } from "@/portal-auth";
+import { PASSWORD_NUDGE_COOKIE } from "../_components/password-nudge";
 
 const clientRepository = new PrismaClientRepository();
+const oauthAccountRepository = new PrismaClientOAuthAccountRepository();
 
 export type PortalActionResult = { success: boolean; error?: string };
 
@@ -59,7 +66,10 @@ export async function registerClientAction(input: {
   }
 
   try {
-    const account = await new RegisterClientAccount(clientRepository).execute({
+    const account = await new RegisterClientAccount(
+      clientRepository,
+      oauthAccountRepository,
+    ).execute({
       name: parsed.data.name,
       email: parsed.data.email,
       phone: parsed.data.phone,
@@ -99,8 +109,71 @@ export async function loginClientAction(input: {
   }
 }
 
+/**
+ * Inicia o login com Google. Redireciona para o consentimento do Google; a
+ * conta é resolvida no callback (src/portal-auth.ts) e a sessão do portal é
+ * gravada lá. Nenhum segredo passa por aqui.
+ */
+export async function signInWithGoogleAction(): Promise<void> {
+  await portalSignIn("google", { redirectTo: PORTAL_HOME_PATH });
+}
+
+/** Diz só se a conta já tem senha — nada além disso vai para a tela. */
+export async function getClientAccountStatusAction(): Promise<{
+  hasPassword: boolean;
+}> {
+  const session = await requireClientSession();
+  const client = await clientRepository.findById(session.clientId);
+  return { hasPassword: Boolean(client?.password) };
+}
+
+/**
+ * Define a senha de quem entrou pelo Google e também quer o login por senha.
+ * O cliente vem da sessão — o navegador não escolhe de quem é a senha.
+ */
+export async function setClientPasswordAction(input: {
+  password: string;
+  passwordConfirmation: string;
+}): Promise<PortalActionResult> {
+  const parsed = z
+    .object({
+      password: z
+        .string()
+        .min(
+          MIN_CLIENT_PASSWORD_LENGTH,
+          `A senha deve ter pelo menos ${MIN_CLIENT_PASSWORD_LENGTH} caracteres`,
+        ),
+      passwordConfirmation: z.string(),
+    })
+    .refine((data) => data.password === data.passwordConfirmation, {
+      message: "As senhas não conferem",
+      path: ["passwordConfirmation"],
+    })
+    .safeParse(input);
+
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+  }
+
+  try {
+    const session = await requireClientSession();
+    await new SetClientPassword(clientRepository).execute(
+      session.clientId,
+      parsed.data.password,
+    );
+    return { success: true };
+  } catch (error) {
+    if (error instanceof ClientAccountError) {
+      return { success: false, error: error.message };
+    }
+    return { success: false, error: formatActionError(error, "Erro ao definir sua senha.") };
+  }
+}
+
 export async function logoutClientAction(): Promise<void> {
   await destroyClientSession();
+  // A dispensa do convite de senha vale por sessão: sai junto com ela.
+  (await cookies()).delete(PASSWORD_NUDGE_COOKIE);
   redirect("/cliente/login");
 }
 
