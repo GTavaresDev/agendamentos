@@ -1,27 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import { hashPassword } from "../core/infra/auth/password";
 
-const prodDatabaseUrl =
-  process.argv[2] ||
-  process.env.PROD_DATABASE_URL ||
-  process.env.DATABASE_URL;
-
-if (!prodDatabaseUrl) {
-  console.error("Erro: Nenhuma URL de banco de dados fornecida.");
-  console.log('Uso: npx tsx scripts/seed-prod.ts "POSTGRESQL_URL_PRODUCAO"');
-  process.exit(1);
-}
-
-const targetUrl: string = prodDatabaseUrl;
-const MASTER_ADMIN_ID = "bb323bc0-f216-4309-8ef5-db9ea664e845";
-
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: targetUrl,
-    },
-  },
-});
+const prisma = new PrismaClient();
+const ADMIN_ID = "bb323bc0-f216-4309-8ef5-db9ea664e845";
 
 function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/);
@@ -37,98 +18,89 @@ function formatDate(d: Date): string {
 }
 
 async function main() {
-  console.log("=== Inicializando Seed Completo de Produção ===");
-  console.log("URL Target:", targetUrl.replace(/:[^:@]+@/, ":****@"));
+  console.log("=== Limpando e Semeando Dados (Gabriel) ===");
 
-  // 1. Permissões
-  console.log("\n1. Criando Permissões do Sistema...");
+  await prisma.sale.deleteMany({});
+  await prisma.appointment.deleteMany({});
+  await prisma.userPermission.deleteMany({});
+  await prisma.systemPermission.deleteMany({});
+  await prisma.service.deleteMany({});
+  await prisma.product.deleteMany({});
+  await prisma.client.deleteMany({});
+  await prisma.user.deleteMany({});
+
   const permissions = [
-    { name: "ver_relatorios", description: "Permite acesso ao módulo de Relatórios", category: "reports" },
-    { name: "compartilhar_permissoes", description: "Permite atribuir permissões a outros usuários", category: "admin" },
+    { name: "ver_relatorios", description: "Permite acesso ao módulo de Relatórios", category: "reports", enabled: true, requiresHierarchy: false },
+    { name: "compartilhar_permissoes", description: "Permite atribuir permissões a outros usuários", category: "admin", enabled: true, requiresHierarchy: false },
   ];
+  await prisma.systemPermission.createMany({ data: permissions });
 
-  for (const perm of permissions) {
-    await prisma.systemPermission.upsert({
-      where: { name: perm.name },
-      update: { description: perm.description, category: perm.category, enabled: true },
-      create: { name: perm.name, description: perm.description, category: perm.category, enabled: true, requiresHierarchy: false },
-    });
-  }
+  const defaultPassword = await hashPassword("zxcasd");
+  const gabrielPassword = await hashPassword("lkjh-poiu-zxc10");
 
-  // 2. Usuários
-  console.log("\n2. Criando Usuários...");
-  const adminPasswordHash = await hashPassword("zxcasd");
-  const gabrielPasswordHash = await hashPassword("lkjh-poiu-zxc10");
-
-  const adminUser = await prisma.user.upsert({
-    where: { email: "admin@agendamentos.com" },
-    update: { id: MASTER_ADMIN_ID, name: "Admin Agendamentos", role: "Administrador", status: "Ativo" },
-    create: {
-      id: MASTER_ADMIN_ID,
+  const adminUser = await prisma.user.create({
+    data: {
+      id: ADMIN_ID,
       name: "Admin Agendamentos",
       email: "admin@agendamentos.com",
       phone: "(11) 90000-0001",
-      password: adminPasswordHash,
+      password: defaultPassword,
       role: "Administrador",
       status: "Ativo",
       initials: "AH",
       last: "Online",
+      permissions: { create: [{ name: "ver_relatorios" }, { name: "compartilhar_permissoes" }] },
     },
   });
 
-  const gabrielUser = await prisma.user.upsert({
-    where: { email: "gabriel@agendamentos.com" },
-    update: { name: "Gabriel Tavares", role: "Administrador", status: "Ativo" },
-    create: {
+  const gabrielUser = await prisma.user.create({
+    data: {
       name: "Gabriel Tavares",
       email: "gabriel@agendamentos.com",
       phone: "(11) 99999-9999",
-      password: gabrielPasswordHash,
+      password: gabrielPassword,
       role: "Administrador",
       status: "Ativo",
       initials: "GT",
       last: "Online",
+      permissions: { create: [{ name: "ver_relatorios" }, { name: "compartilhar_permissoes" }] },
     },
   });
 
-  const julianaUser = await prisma.user.upsert({
-    where: { email: "juliana@agendamentos.com" },
-    update: { name: "Dra. Juliana Martins", role: "Esteticista", status: "Ativo" },
-    create: {
+  const julianaUser = await prisma.user.create({
+    data: {
       name: "Dra. Juliana Martins",
       email: "juliana@agendamentos.com",
       phone: "(11) 98888-0002",
-      password: adminPasswordHash,
+      password: defaultPassword,
       role: "Esteticista",
       status: "Ativo",
       initials: "JM",
       last: "Há 1h",
+      permissions: { create: [{ name: "ver_relatorios" }] },
     },
   });
 
-  const camilaUser = await prisma.user.upsert({
-    where: { email: "camila@agendamentos.com" },
-    update: { name: "Dra. Camila Rocha", role: "Dermatologista", status: "Ativo" },
-    create: {
+  const camilaUser = await prisma.user.create({
+    data: {
       name: "Dra. Camila Rocha",
       email: "camila@agendamentos.com",
       phone: "(11) 98888-0003",
-      password: adminPasswordHash,
+      password: defaultPassword,
       role: "Dermatologista",
       status: "Ativo",
       initials: "CR",
       last: "Hoje",
+      permissions: { create: [{ name: "ver_relatorios" }] },
     },
   });
 
-  const funcUser = await prisma.user.upsert({
-    where: { email: "func@agendamentos.com" },
-    update: { name: "Mariana Costa", role: "Funcionario", status: "Ativo" },
-    create: {
+  const funcUser = await prisma.user.create({
+    data: {
       name: "Mariana Costa",
       email: "func@agendamentos.com",
       phone: "(11) 90000-0003",
-      password: adminPasswordHash,
+      password: defaultPassword,
       role: "Funcionario",
       status: "Ativo",
       initials: "MC",
@@ -138,19 +110,6 @@ async function main() {
 
   const users = [adminUser, gabrielUser, julianaUser, camilaUser, funcUser];
 
-  // Atribuir permissões
-  for (const u of [adminUser, gabrielUser, julianaUser, camilaUser]) {
-    for (const perm of permissions) {
-      await prisma.userPermission.upsert({
-        where: { userId_name: { userId: u.id, name: perm.name } },
-        update: { enabled: true },
-        create: { userId: u.id, name: perm.name, description: perm.description, enabled: true },
-      });
-    }
-  }
-
-  // 3. Serviços
-  console.log("\n3. Criando Serviços...");
   const serviceDefs = [
     { id: "srv-1", name: "Consulta Inicial", description: "Avaliação estética facial completa", duration: 30, price: 150.0, color: "#10b981" },
     { id: "srv-2", name: "Harmonização Facial", description: "Procedimento estético avançado com preenchedores", duration: 90, price: 1200.0, color: "#8b5cf6" },
@@ -164,16 +123,10 @@ async function main() {
 
   const createdServices = [];
   for (const s of serviceDefs) {
-    const srv = await prisma.service.upsert({
-      where: { id: s.id },
-      update: { name: s.name, price: s.price, color: s.color, duration: s.duration },
-      create: { ...s, status: "Ativo" },
-    });
+    const srv = await prisma.service.create({ data: { ...s, status: "Ativo" } });
     createdServices.push(srv);
   }
 
-  // 4. Produtos
-  console.log("\n4. Criando Produtos...");
   const productDefs = [
     { id: "prod-1", name: "Sérum Anti-idade Ácido Hialurônico 30ml", category: "Skincare", price: 180.0, quantity: 45 },
     { id: "prod-2", name: "Protetor Solar Facial FPS 70", category: "Proteção Solar", price: 95.0, quantity: 80 },
@@ -186,16 +139,10 @@ async function main() {
 
   const createdProducts = [];
   for (const p of productDefs) {
-    const prod = await prisma.product.upsert({
-      where: { id: p.id },
-      update: { name: p.name, price: p.price, quantity: p.quantity },
-      create: { ...p, status: "Ativo" },
-    });
+    const prod = await prisma.product.create({ data: { ...p, status: "Ativo" } });
     createdProducts.push(prod);
   }
 
-  // 5. 50 Clientes Únicos
-  console.log("\n5. Criando 50 Clientes...");
   const clientNames = [
     "Ana Paula Silva", "Carlos Eduardo Santos", "Mariana Oliveira", "Beatriz Costa", "Lucas Mendes",
     "Fernanda Lima", "Rodrigo Alves", "Juliana Barbosa", "Rafael Souza", "Camila Pereira",
@@ -221,10 +168,8 @@ async function main() {
     const cpf = `${d1}.${d2}.${d3}-${d4}`;
     const phone = `(11) 9${Math.floor(Math.random() * 8999 + 1000)}-${Math.floor(Math.random() * 8999 + 1000)}`;
 
-    const cli = await prisma.client.upsert({
-      where: { email },
-      update: { name, phone },
-      create: {
+    const cli = await prisma.client.create({
+      data: {
         id: `cli-${i + 1}`,
         name,
         email,
@@ -237,8 +182,6 @@ async function main() {
     createdClients.push(cli);
   }
 
-  // 6. Agendamentos
-  console.log("\n6. Criando Agendamentos para os últimos 3 meses...");
   const baseDate = new Date("2026-08-07T12:00:00Z");
   const timeSlots = ["08:30", "09:15", "10:00", "10:45", "11:30", "13:30", "14:30", "15:15", "16:00", "17:00", "18:00"];
   const channels = ["digital", "whatsapp", "presencial", "telefone"];
@@ -284,10 +227,8 @@ async function main() {
       const id = `apt-${apptCount}`;
       const dateStr = formatDate(currentDate);
 
-      await prisma.appointment.upsert({
-        where: { id },
-        update: { date: dateStr, time, status, userId: user.id, clientId: client.id, serviceId: service.id },
-        create: {
+      await prisma.appointment.create({
+        data: {
           id,
           date: dateStr,
           time,
@@ -306,8 +247,6 @@ async function main() {
     }
   }
 
-  // 7. Vendas
-  console.log("\n7. Criando Vendas de Produtos...");
   let salesCount = 0;
   const paymentMethods = ["Pix", "Pix", "Pix", "Crédito", "Crédito", "Débito", "Dinheiro"];
 
@@ -328,10 +267,8 @@ async function main() {
       const id = `sale-${salesCount}`;
       const saleDate = new Date(currentDate.getTime() + (Math.floor(Math.random() * 8 + 9) * 3600000));
 
-      await prisma.sale.upsert({
-        where: { id },
-        update: { totalPrice, createdAt: saleDate },
-        create: {
+      await prisma.sale.create({
+        data: {
           id,
           productId: prod.id,
           quantity,
@@ -345,12 +282,12 @@ async function main() {
     }
   }
 
-  console.log("\n=== Setup de Produção Concluído com Sucesso! ===");
+  console.log("=== Seed Gabriel Concluído com Sucesso! ===");
 }
 
 main()
   .catch((e) => {
-    console.error("\n Erro ao executar setup de produção:", e);
+    console.error(e);
     process.exit(1);
   })
   .finally(async () => {

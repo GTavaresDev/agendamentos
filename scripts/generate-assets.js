@@ -2,11 +2,50 @@ const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 
+function createIcoFromPngBuffer(pngBuffer, width = 32, height = 32) {
+  // ICO header: 6 bytes
+  const header = Buffer.alloc(6);
+  header.writeUInt16LE(0, 0); // Reserved
+  header.writeUInt16LE(1, 2); // Image type: 1 = ICO
+  header.writeUInt16LE(1, 4); // Number of images: 1
+
+  // Directory entry: 16 bytes
+  const dirEntry = Buffer.alloc(16);
+  dirEntry.writeUInt8(width >= 256 ? 0 : width, 0);
+  dirEntry.writeUInt8(height >= 256 ? 0 : height, 1);
+  dirEntry.writeUInt8(0, 2); // Color palette
+  dirEntry.writeUInt8(0, 3); // Reserved
+  dirEntry.writeUInt16LE(1, 4); // Color planes
+  dirEntry.writeUInt16LE(32, 6); // Bits per pixel
+  dirEntry.writeUInt32LE(pngBuffer.length, 8); // Size of image data
+  dirEntry.writeUInt32LE(22, 12); // Offset of image data (6 + 16)
+
+  return Buffer.concat([header, dirEntry, pngBuffer]);
+}
+
 async function generateAssets() {
   const publicDir = path.join(__dirname, '../public');
   const appDir = path.join(__dirname, '../src/app');
 
-  // --- 1. Generate OG Image (1200 x 630) for Agendamentos ---
+  // --- 1. Vector Icon SVG ---
+  const iconSvg = `<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="112" fill="#09090b" />
+  <g transform="translate(106, 106)">
+    <rect width="300" height="300" rx="60" fill="#18181b" stroke="#27272a" stroke-width="6" />
+    <rect x="65" y="65" width="170" height="170" rx="32" fill="none" stroke="#ffffff" stroke-width="14" />
+    <line x1="65" y1="120" x2="235" y2="120" stroke="#ffffff" stroke-width="14" />
+    <circle cx="115" cy="165" r="14" fill="#10b981" />
+    <circle cx="185" cy="165" r="14" fill="#ffffff" />
+    <circle cx="115" cy="205" r="14" fill="#ffffff" />
+    <circle cx="185" cy="205" r="14" fill="#10b981" />
+  </g>
+</svg>`;
+
+  fs.writeFileSync(path.join(publicDir, 'icon.svg'), iconSvg);
+  fs.writeFileSync(path.join(appDir, 'icon.svg'), iconSvg);
+  console.log('Generated icon.svg');
+
+  // --- 2. Generate OG Image (1200 x 630) for Agendamentos ---
   const ogBgSvg = `
     <svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -14,10 +53,6 @@ async function generateAssets() {
           <stop offset="0%" stop-color="#18181b" />
           <stop offset="50%" stop-color="#09090b" />
           <stop offset="100%" stop-color="#000000" />
-        </linearGradient>
-        <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#10b981" />
-          <stop offset="100%" stop-color="#059669" />
         </linearGradient>
       </defs>
       <rect width="1200" height="630" fill="url(#bgGrad)" />
@@ -53,47 +88,29 @@ async function generateAssets() {
   fs.writeFileSync(path.join(appDir, 'og-image.png'), ogImageBuffer);
   console.log('Generated og-image.png');
 
-  // --- 2. Generate Icon (512x512) for Favicon and Web App ---
-  const iconSize = 512;
-  const iconSvg = `
-    <svg width="${iconSize}" height="${iconSize}" viewBox="0 0 ${iconSize} ${iconSize}" xmlns="http://www.w3.org/2000/svg">
-      <rect width="${iconSize}" height="${iconSize}" rx="112" fill="#09090b" />
-      <g transform="translate(106, 106)">
-        <rect width="300" height="300" rx="60" fill="#18181b" stroke="#27272a" stroke-width="6" />
-        <rect x="65" y="65" width="170" height="170" rx="32" fill="none" stroke="#ffffff" stroke-width="14" />
-        <line x1="65" y1="120" x2="235" y2="120" stroke="#ffffff" stroke-width="14" />
-        <circle cx="115" cy="165" r="14" fill="#10b981" />
-        <circle cx="185" cy="165" r="14" fill="#ffffff" />
-        <circle cx="115" cy="205" r="14" fill="#ffffff" />
-        <circle cx="185" cy="205" r="14" fill="#10b981" />
-      </g>
-    </svg>
-  `;
+  // --- 3. PNG Icons (512, 192, 180) ---
+  const iconBuffer512 = await sharp(Buffer.from(iconSvg)).png().toBuffer();
+  fs.writeFileSync(path.join(publicDir, 'icon.png'), iconBuffer512);
+  fs.writeFileSync(path.join(appDir, 'icon.png'), iconBuffer512);
 
-  const hIconBuffer = await sharp(Buffer.from(iconSvg))
-    .png()
-    .toBuffer();
+  const iconBuffer192 = await sharp(iconBuffer512).resize(192, 192).png().toBuffer();
+  fs.writeFileSync(path.join(publicDir, 'agendamentos_icon.png'), iconBuffer192);
+  fs.writeFileSync(path.join(appDir, 'agendamentos_icon.png'), iconBuffer192);
 
-  fs.writeFileSync(path.join(publicDir, 'icon.png'), hIconBuffer);
-  fs.writeFileSync(path.join(appDir, 'icon.png'), hIconBuffer);
+  const appleIconBuffer = await sharp(iconBuffer512).resize(180, 180).png().toBuffer();
+  fs.writeFileSync(path.join(publicDir, 'apple-icon.png'), appleIconBuffer);
+  fs.writeFileSync(path.join(appDir, 'apple-icon.png'), appleIconBuffer);
 
-  const appleIconBuffer = await sharp(hIconBuffer)
-    .resize(180, 180)
-    .png()
-    .toBuffer();
+  // --- 4. Valid ICO Favicon (32x32 with ICO container header) ---
+  const favicon32Png = await sharp(iconBuffer512).resize(32, 32).png().toBuffer();
+  const faviconIcoBuffer = createIcoFromPngBuffer(favicon32Png, 32, 32);
 
-  fs.writeFileSync(path.join(publicDir, 'agendamentos_icon.png'), appleIconBuffer);
-  fs.writeFileSync(path.join(appDir, 'agendamentos_icon.png'), appleIconBuffer);
+  fs.writeFileSync(path.join(publicDir, 'favicon.ico'), faviconIcoBuffer);
+  fs.writeFileSync(path.join(appDir, 'favicon.ico'), faviconIcoBuffer);
+  console.log('Generated valid favicon.ico');
 
-  const favicon32Buffer = await sharp(hIconBuffer)
-    .resize(32, 32)
-    .png()
-    .toBuffer();
-
-  fs.writeFileSync(path.join(publicDir, 'favicon.ico'), favicon32Buffer);
-  fs.writeFileSync(path.join(appDir, 'favicon.ico'), favicon32Buffer);
-
-  console.log('All Agendamentos assets generated successfully!');
+  console.log('All Agendamentos branding assets generated successfully!');
 }
 
 generateAssets().catch(console.error);
+
