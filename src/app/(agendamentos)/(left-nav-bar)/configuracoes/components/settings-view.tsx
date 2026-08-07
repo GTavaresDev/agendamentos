@@ -46,7 +46,7 @@ export function SettingsView() {
             <div className="rounded-xl border border-zinc-100 bg-zinc-50/60 p-4">
               <span className="text-xs text-zinc-400 block font-medium">Plataforma</span>
               <span className="text-sm font-semibold text-zinc-900 mt-1 block">Agendamentos</span>
-              <span className="text-[11px] text-zinc-500 mt-0.5 block">Sistema de Gestão & Agendamentos</span>
+              <span className="text-[11px] text-zinc-500 mt-0.5 block">Saúde, Bem Estar e Estética</span>
             </div>
 
             <div className="rounded-xl border border-zinc-100 bg-zinc-50/60 p-4">

@@ -72,36 +72,36 @@ export function ProductsView() {
   return (
     <div className="mx-auto max-w-[1500px] p-3.5 sm:p-6 lg:p-8">
       {/* 4 Metric Cards at Top */}
-      <div className="mb-6 grid gap-2.5 sm:gap-3 grid-cols-2 lg:grid-cols-4">
-        <Card className="p-3 sm:p-4">
-          <div className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-500 truncate">
+      <div className="mb-6 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        <Card className="@container/card p-[clamp(0.75rem,4cqw,1.25rem)] flex flex-col justify-between h-full shadow-xs hover:border-zinc-300 transition-all">
+          <div className="text-[clamp(0.625rem,2.8cqw,0.75rem)] font-semibold uppercase tracking-wider text-zinc-500 leading-tight whitespace-nowrap overflow-hidden text-ellipsis">
             Total de Produtos
           </div>
-          <div className="mt-1.5 text-xl sm:text-2xl font-bold text-zinc-900 truncate">
+          <div className="mt-[clamp(0.375rem,2cqw,0.75rem)] text-[clamp(1.125rem,6cqw,1.625rem)] font-bold text-zinc-900 leading-none whitespace-nowrap">
             {totalProducts}
           </div>
         </Card>
-        <Card className="p-3 sm:p-4">
-          <div className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-500 truncate">
+        <Card className="@container/card p-[clamp(0.75rem,4cqw,1.25rem)] flex flex-col justify-between h-full shadow-xs hover:border-zinc-300 transition-all">
+          <div className="text-[clamp(0.625rem,2.8cqw,0.75rem)] font-semibold uppercase tracking-wider text-zinc-500 leading-tight whitespace-nowrap overflow-hidden text-ellipsis">
             Itens em Estoque
           </div>
-          <div className="mt-1.5 text-xl sm:text-2xl font-bold text-zinc-900 truncate">
+          <div className="mt-[clamp(0.375rem,2cqw,0.75rem)] text-[clamp(1.125rem,6cqw,1.625rem)] font-bold text-zinc-900 leading-none whitespace-nowrap">
             {totalStock} un.
           </div>
         </Card>
-        <Card className="p-3 sm:p-4">
-          <div className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-500 truncate">
+        <Card className="@container/card p-[clamp(0.75rem,4cqw,1.25rem)] flex flex-col justify-between h-full shadow-xs hover:border-zinc-300 transition-all">
+          <div className="text-[clamp(0.625rem,2.8cqw,0.75rem)] font-semibold uppercase tracking-wider text-zinc-500 leading-tight whitespace-nowrap overflow-hidden text-ellipsis">
             Produtos Ativos
           </div>
-          <div className="mt-1.5 text-xl sm:text-2xl font-bold text-zinc-900 truncate">
+          <div className="mt-[clamp(0.375rem,2cqw,0.75rem)] text-[clamp(1.125rem,6cqw,1.625rem)] font-bold text-zinc-900 leading-none whitespace-nowrap">
             {activeProducts}
           </div>
         </Card>
-        <Card className="p-3 sm:p-4">
-          <div className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-500 truncate">
+        <Card className="@container/card p-[clamp(0.75rem,4cqw,1.25rem)] flex flex-col justify-between h-full shadow-xs hover:border-zinc-300 transition-all">
+          <div className="text-[clamp(0.625rem,2.8cqw,0.75rem)] font-semibold uppercase tracking-wider text-zinc-500 leading-tight whitespace-nowrap overflow-hidden text-ellipsis">
             Baixo Estoque
           </div>
-          <div className="mt-1.5 text-xl sm:text-2xl font-bold text-zinc-900 truncate">
+          <div className="mt-[clamp(0.375rem,2cqw,0.75rem)] text-[clamp(1.125rem,6cqw,1.625rem)] font-bold text-zinc-900 leading-none whitespace-nowrap">
             {lowStockProducts}
           </div>
         </Card>

@@ -173,29 +173,33 @@ export function MetricCard({
   align?: "left" | "right" | "center";
 }) {
   return (
-    <Card className="overflow-hidden border-zinc-200/80 bg-white shadow-xs">
-      <CardContent className="p-2.5 sm:p-5">
-        <div className="flex items-center justify-between gap-1">
-          <span className="flex size-7 sm:size-10 shrink-0 items-center justify-center rounded-lg sm:rounded-xl bg-zinc-100 text-zinc-700">
-            <Icon className="size-3.5 sm:size-5" />
-          </span>
-          <div className="flex items-center gap-1 shrink-0">
-            {info && <CardInfoModal info={info} align={align} />}
-            <Badge variant={positive ? "success" : "secondary"} className="text-[9px] sm:text-xs px-1.5 py-0.5">
-              {positive ? (
-                <ArrowUpRight className="mr-0.5 size-3" />
-              ) : (
-                <ArrowDownRight className="mr-0.5 size-3" />
-              )}
-              {change}
-            </Badge>
+    <Card className="@container/report-card h-full overflow-hidden border-zinc-200/80 bg-white shadow-xs flex flex-col justify-between">
+      <CardContent className="p-[clamp(0.75rem,4.5cqw,1.25rem)] flex flex-col justify-between h-full space-y-[clamp(0.5rem,2.5cqw,1rem)]">
+        <div>
+          <div className="flex items-center justify-between gap-[clamp(0.25rem,1.5cqw,0.75rem)] mb-[clamp(0.375rem,2.5cqw,0.75rem)]">
+            <span className="flex size-[clamp(1.75rem,8cqw,2.5rem)] shrink-0 items-center justify-center rounded-xl bg-zinc-100 text-zinc-700">
+              <Icon className="size-[clamp(0.875rem,4cqw,1.25rem)]" />
+            </span>
+            <div className="flex items-center gap-1 shrink-0">
+              {info && <CardInfoModal info={info} align={align} />}
+              <Badge variant={positive ? "success" : "secondary"} className="text-[clamp(0.5625rem,2.5cqw,0.75rem)] px-[clamp(0.375rem,1.8cqw,0.5rem)] py-[clamp(0.125rem,0.8cqw,0.25rem)] whitespace-nowrap leading-none flex items-center">
+                {positive ? (
+                  <ArrowUpRight className="mr-0.5 size-[clamp(0.625rem,2.5cqw,0.75rem)]" />
+                ) : (
+                  <ArrowDownRight className="mr-0.5 size-[clamp(0.625rem,2.5cqw,0.75rem)]" />
+                )}
+                {change}
+              </Badge>
+            </div>
           </div>
+          <p className="text-[clamp(0.6875rem,3.2cqw,0.875rem)] font-medium text-zinc-500 leading-tight whitespace-nowrap overflow-hidden text-ellipsis">{title}</p>
         </div>
-        <p className="mt-2.5 sm:mt-5 text-[11px] sm:text-sm font-medium text-zinc-500 truncate">{title}</p>
-        <p className="mt-0.5 sm:mt-1 text-lg sm:text-3xl font-semibold tracking-[-0.04em] text-zinc-950 truncate">
-          {value}
-        </p>
-        <p className="mt-1 sm:mt-2 text-[9px] sm:text-xs text-zinc-400 truncate">{description}</p>
+        <div className="mt-auto pt-1">
+          <p className="text-[clamp(1.125rem,6.8cqw,1.875rem)] font-semibold tracking-[-0.04em] text-zinc-950 leading-none whitespace-nowrap">
+            {value}
+          </p>
+          <p className="mt-[clamp(0.25rem,1.5cqw,0.5rem)] text-[clamp(0.5625rem,2.6cqw,0.75rem)] text-zinc-400 leading-tight whitespace-nowrap overflow-hidden text-ellipsis">{description}</p>
+        </div>
       </CardContent>
     </Card>
   );

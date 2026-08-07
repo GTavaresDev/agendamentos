@@ -52,7 +52,7 @@ async function main() {
       password: defaultPassword,
       role: "Administrador",
       status: "Ativo",
-      initials: "AA",
+      initials: "AH",
       last: "Online",
       failedLoginAttempts: 0,
       permissions: {
@@ -72,7 +72,7 @@ async function main() {
       password: gabrielPassword,
       role: "Administrador",
       status: "Ativo",
-      initials: "GA",
+      initials: "GH",
       last: "Online",
       failedLoginAttempts: 0,
       permissions: {
@@ -92,7 +92,7 @@ async function main() {
       password: defaultPassword,
       role: "Gestor",
       status: "Ativo",
-      initials: "GA",
+      initials: "GH",
       last: "Ontem",
       failedLoginAttempts: 0,
       permissions: {
@@ -109,7 +109,7 @@ async function main() {
       password: defaultPassword,
       role: "Funcionario",
       status: "Ativo",
-      initials: "FA",
+      initials: "FH",
       last: "Hoje",
       failedLoginAttempts: 0,
     },

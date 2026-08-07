@@ -55,7 +55,7 @@ export class AuthenticateUser {
           email: normalizedEmail.includes("@") ? normalizedEmail : "admin@agendamentos.com",
           role: "Administrador",
           permissionLevel: 1,
-          initials: "AA",
+          initials: "AH",
         };
       }
       throw dbError;
@@ -69,7 +69,7 @@ export class AuthenticateUser {
           email: normalizedEmail,
           role: "Administrador",
           permissionLevel: 1,
-          initials: "AA",
+          initials: "AH",
         };
       }
       throw new AuthenticationError("Credenciais inválidas");

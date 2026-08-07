@@ -85,7 +85,7 @@ export function ReportsDashboard() {
             </div>
           </div>
 
-          <div className="grid gap-2.5 sm:gap-4 grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             <MetricCard
               title="Total de agendamentos"
               value={totalAppts.toString()}

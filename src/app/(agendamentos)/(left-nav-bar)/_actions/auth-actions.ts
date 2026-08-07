@@ -19,7 +19,12 @@ import type { StaffRole } from "@core/domain/users/user.entity";
 import { formatActionError } from "@/lib/action-error-handler";
 
 const loginSchema = z.object({
-  email: z.string().min(1, "Informe o e-mail ou usuário"),
+  email: z
+    .string()
+    .min(1, "Informe o e-mail")
+    .refine((val) => val.includes("@"), {
+      message: "Informe um e-mail válido com @",
+    }),
   password: z.string().min(1, "Informe a senha"),
 });
 
@@ -39,18 +44,7 @@ export async function loginAction(input: {
   email: string;
   password: string;
 }): Promise<{ success: boolean; error?: string }> {
-  let email = (input.email || "").trim();
-  const lower = email.toLowerCase();
-
-  if (lower === "admin" || lower === "admin@agendamentos") {
-    email = "admin@agendamentos.com";
-  } else if (lower === "gabriel" || lower === "gabriel@agendamentos") {
-    email = "gabriel@agendamentos.com";
-  } else if (email && !email.includes("@")) {
-    email = `${email}@agendamentos.com`;
-  }
-
-  const parsed = loginSchema.safeParse({ email, password: input.password });
+  const parsed = loginSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, error: "Credenciais inválidas" };
   }

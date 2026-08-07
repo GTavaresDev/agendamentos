@@ -16,31 +16,43 @@ export function StatCard({
   progress?: number;
 }) {
   return (
-    <Card className="overflow-hidden border-zinc-800 bg-zinc-900 text-white shadow-md transition-all hover:border-zinc-700 hover:bg-zinc-950">
-      <CardContent className="p-2.5 sm:p-5">
-        <div className="mb-2 sm:mb-5 flex items-center justify-between gap-1">
-          <div className="flex size-7 sm:size-10 shrink-0 items-center justify-center rounded-lg sm:rounded-xl bg-zinc-800 text-white">
-            <Icon className="size-3.5 sm:size-5" />
+    <Card className="@container/stat h-full overflow-hidden border-zinc-800 bg-zinc-900 text-white shadow-md transition-all hover:border-zinc-700 hover:bg-zinc-950 flex flex-col justify-between">
+      <CardContent className="p-[clamp(0.75rem,4.5cqw,1.25rem)] flex flex-col justify-between h-full space-y-[clamp(0.5rem,2.5cqw,1rem)]">
+        <div>
+          <div className="mb-[clamp(0.375rem,2.5cqw,0.75rem)] flex items-center justify-between gap-[clamp(0.25rem,1.5cqw,0.75rem)]">
+            <div className="flex size-[clamp(1.75rem,8cqw,2.5rem)] shrink-0 items-center justify-center rounded-xl bg-zinc-800 text-white">
+              <Icon className="size-[clamp(0.875rem,4cqw,1.25rem)]" />
+            </div>
+            <Badge
+              variant="outline"
+              className="border-white/15 bg-white/10 text-[clamp(0.5625rem,2.5cqw,0.75rem)] font-medium text-white px-[clamp(0.375rem,1.8cqw,0.5rem)] py-[clamp(0.125rem,0.8cqw,0.25rem)] shrink-0 whitespace-nowrap leading-none flex items-center"
+            >
+              +12% <span className="text-zinc-400 ml-1">este mês</span>
+            </Badge>
           </div>
-          <Badge variant="outline" className="border-white/15 bg-white/10 text-[9px] sm:text-xs font-medium text-white px-1.5 py-0.5 shrink-0">
-            +12% <span className="hidden sm:inline ml-1 text-zinc-400">este mês</span>
-          </Badge>
-        </div>
-        <p className="text-[11px] sm:text-sm font-medium text-zinc-400 truncate">{label}</p>
-        <div className="mt-0.5 sm:mt-1 flex items-baseline justify-between gap-1">
-          <p className="text-lg sm:text-3xl font-semibold tracking-[-0.04em] text-white tabular-nums">
-            {value}
+          <p className="text-[clamp(0.6875rem,3.2cqw,0.875rem)] font-medium text-zinc-400 leading-tight whitespace-nowrap overflow-hidden text-ellipsis">
+            {label}
           </p>
-          <span className="text-[9px] sm:text-xs text-zinc-400 truncate max-w-[70px] sm:max-w-none">{detail}</span>
         </div>
-        {progress !== undefined && (
-          <div className="mt-2 sm:mt-4 h-1 sm:h-1.5 overflow-hidden rounded-full bg-zinc-800">
-            <div
-              className="h-full rounded-full bg-white transition-[width] duration-300"
-              style={{ width: `${progress}%` }}
-            />
+
+        <div className="mt-auto pt-1">
+          <div className="flex items-baseline justify-between gap-x-[clamp(0.25rem,1.5cqw,0.5rem)]">
+            <p className="text-[clamp(1.125rem,6.8cqw,1.875rem)] font-semibold tracking-[-0.04em] text-white tabular-nums leading-none whitespace-nowrap">
+              {value}
+            </p>
+            <span className="text-[clamp(0.5625rem,2.6cqw,0.75rem)] text-zinc-400 font-normal leading-none whitespace-nowrap shrink-0">
+              {detail}
+            </span>
           </div>
-        )}
+          {progress !== undefined && (
+            <div className="mt-[clamp(0.375rem,2cqw,0.75rem)] h-[clamp(0.25rem,1.2cqw,0.375rem)] overflow-hidden rounded-full bg-zinc-800">
+              <div
+                className="h-full rounded-full bg-white transition-[width] duration-300"
+                style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
+              />
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

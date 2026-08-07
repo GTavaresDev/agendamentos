@@ -43,15 +43,15 @@ export function ReportTrendCharts({
         />
         <CardContent className="flex-1 flex flex-col justify-between p-3.5 sm:p-5 space-y-3 sm:space-y-4">
           {/* Main Total Revenue */}
-          <div className="rounded-xl border border-zinc-200/80 bg-zinc-50/70 p-3 sm:p-4">
-            <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+          <div className="@container/rev rounded-xl border border-zinc-200/80 bg-zinc-50/70 p-[clamp(0.625rem,3.5cqw,1rem)]">
+            <span className="text-[clamp(0.5625rem,2.5cqw,0.6875rem)] font-semibold uppercase tracking-wider text-zinc-500 leading-tight block whitespace-nowrap overflow-hidden text-ellipsis">
               Receita Total do Período
             </span>
-            <div className="mt-1 flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 sm:gap-2">
-              <span className="text-xl sm:text-2xl font-bold text-zinc-950 truncate">
+            <div className="mt-1 flex items-baseline justify-between gap-x-2">
+              <span className="text-[clamp(1.125rem,5.5cqw,1.5rem)] font-bold text-zinc-950 leading-none whitespace-nowrap">
                 {dbMetrics?.estimatedRevenue || "R$ 0,00"}
               </span>
-              <span className="text-[10px] sm:text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 w-fit">
+              <span className="text-[clamp(0.5625rem,2.4cqw,0.6875rem)] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 whitespace-nowrap leading-none shrink-0">
                 Agendamentos + Vendas
               </span>
             </div>

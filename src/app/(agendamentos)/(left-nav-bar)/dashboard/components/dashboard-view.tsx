@@ -117,94 +117,99 @@ export function DashboardView() {
 
   return (
     <div className="mx-auto max-w-[1500px] p-3.5 sm:p-6 lg:p-8 space-y-6">
-      {/* Começar / Ações Rápidas (Primeiro no Mobile) */}
-      <div>
-        <h2 className="mb-2.5 text-sm sm:text-base font-semibold tracking-tight text-zinc-950">
-          Começar
-        </h2>
-        <div className="grid grid-cols-4 gap-2 sm:gap-4">
-          <button
-            type="button"
-            onClick={onNew}
-            className="group flex flex-col items-center justify-center rounded-2xl border border-zinc-200/80 bg-white p-2 sm:p-5 text-center shadow-xs transition-all hover:border-zinc-300 hover:bg-zinc-50/60 hover:shadow-md active:scale-[0.98]"
-          >
-            <div className="flex size-9 sm:size-12 items-center justify-center rounded-xl bg-zinc-100 text-zinc-900 transition-transform group-hover:scale-105">
-              <Plus className="size-4.5 sm:size-6 stroke-[2]" />
-            </div>
-            <span className="mt-1.5 sm:mt-3 text-[10px] sm:text-xs font-semibold text-zinc-900 leading-tight text-center">
-              Novo agendamento
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={onVerAgenda}
-            className="group flex flex-col items-center justify-center rounded-2xl border border-zinc-200/80 bg-white p-2 sm:p-5 text-center shadow-xs transition-all hover:border-zinc-300 hover:bg-zinc-50/60 hover:shadow-md active:scale-[0.98]"
-          >
-            <div className="flex size-9 sm:size-12 items-center justify-center rounded-xl bg-zinc-100 text-zinc-900 transition-transform group-hover:scale-105">
-              <CalendarDays className="size-4.5 sm:size-6 stroke-[1.75]" />
-            </div>
-            <span className="mt-1.5 sm:mt-3 text-[10px] sm:text-xs font-semibold text-zinc-900 leading-tight text-center">
-              Ver agenda completa
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => router.push("/clientes?novo=1")}
-            className="group flex flex-col items-center justify-center rounded-2xl border border-zinc-200/80 bg-white p-2 sm:p-5 text-center shadow-xs transition-all hover:border-zinc-300 hover:bg-zinc-50/60 hover:shadow-md active:scale-[0.98]"
-          >
-            <div className="flex size-9 sm:size-12 items-center justify-center rounded-xl bg-zinc-100 text-zinc-900 transition-transform group-hover:scale-105">
-              <UserCheck className="size-4.5 sm:size-6 stroke-[1.75]" />
-            </div>
-            <span className="mt-1.5 sm:mt-3 text-[10px] sm:text-xs font-semibold text-zinc-900 leading-tight text-center">
-              Cadastrar cliente
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => router.push("/vendas?novo=1")}
-            className="group flex flex-col items-center justify-center rounded-2xl border border-zinc-200/80 bg-white p-2 sm:p-5 text-center shadow-xs transition-all hover:border-zinc-300 hover:bg-zinc-50/60 hover:shadow-md active:scale-[0.98]"
-          >
-            <div className="flex size-9 sm:size-12 items-center justify-center rounded-xl bg-zinc-100 text-zinc-900 transition-transform group-hover:scale-105">
-              <ShoppingCart className="size-4.5 sm:size-6 stroke-[1.75]" />
-            </div>
-            <span className="mt-1.5 sm:mt-3 text-[10px] sm:text-xs font-semibold text-zinc-900 leading-tight text-center">
-              Registrar venda
-            </span>
-          </button>
+      {/* Top Sections: Action Buttons + Stat Cards */}
+      <div className="flex flex-col space-y-6">
+        {/* Indicadores Principais (Primeiro no Desktop) */}
+        <div className="order-2 sm:order-1">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            <StatCard
+              label="Agendamentos hoje"
+              value={todayCount.toString().padStart(2, "0")}
+              detail="de 8 horários"
+              icon={CalendarDays}
+              progress={Math.round((todayCount / 8) * 100)}
+            />
+            <StatCard
+              label="Base de clientes"
+              value={clientsCount.toString()}
+              detail="clientes cadastrados"
+              icon={UserCheck}
+            />
+            <StatCard
+              label="Equipe do sistema"
+              value={usersCount.toString()}
+              detail="membros com acesso"
+              icon={UsersRound}
+            />
+            <StatCard
+              label="Taxa de presença"
+              value={`${todayAttendanceRate}%`}
+              detail={todayCount > 0 ? `${todayCompletedCount} de ${todayCount} agendamentos` : "sem agendamentos"}
+              icon={Check}
+              progress={todayAttendanceRate}
+            />
+          </div>
         </div>
-      </div>
 
-      {/* Indicadores Principais */}
-      <div className="grid gap-2.5 sm:gap-4 grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label="Agendamentos hoje"
-          value={todayCount.toString().padStart(2, "0")}
-          detail="de 8 horários"
-          icon={CalendarDays}
-          progress={Math.round((todayCount / 8) * 100)}
-        />
-        <StatCard
-          label="Base de clientes"
-          value={clientsCount.toString()}
-          detail="clientes cadastrados"
-          icon={UserCheck}
-        />
-        <StatCard
-          label="Equipe do sistema"
-          value={usersCount.toString()}
-          detail="membros com acesso"
-          icon={UsersRound}
-        />
-        <StatCard
-          label="Taxa de presença"
-          value={`${todayAttendanceRate}%`}
-          detail={todayCount > 0 ? `${todayCompletedCount} de ${todayCount} agendamentos` : "sem agendamentos"}
-          icon={Check}
-          progress={todayAttendanceRate}
-        />
+        {/* Começar / Ações Rápidas (Abaixo dos cards no Desktop, Primeiro no Mobile) */}
+        <div className="order-1 sm:order-2">
+          <h2 className="mb-2.5 text-sm sm:text-base font-semibold tracking-tight text-zinc-950">
+            Começar
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            <button
+              type="button"
+              onClick={onNew}
+              className="group @container/action flex flex-col items-center justify-center rounded-2xl border border-zinc-200/80 bg-white p-[clamp(0.75rem,4.5cqw,1.25rem)] text-center shadow-xs transition-all hover:border-zinc-300 hover:bg-zinc-50/60 hover:shadow-md active:scale-[0.98] min-h-[105px] sm:min-h-[125px] h-full"
+            >
+              <div className="flex size-[clamp(2.25rem,9cqw,3rem)] items-center justify-center rounded-xl bg-zinc-100 text-zinc-900 transition-transform group-hover:scale-105">
+                <Plus className="size-[clamp(1.125rem,4.5cqw,1.5rem)] stroke-[2]" />
+              </div>
+              <span className="mt-[clamp(0.375rem,2.5cqw,0.75rem)] text-[clamp(0.6875rem,3.2cqw,0.875rem)] font-semibold text-zinc-900 leading-tight text-center whitespace-nowrap overflow-hidden text-ellipsis w-full">
+                Novo agendamento
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onVerAgenda}
+              className="group @container/action flex flex-col items-center justify-center rounded-2xl border border-zinc-200/80 bg-white p-[clamp(0.75rem,4.5cqw,1.25rem)] text-center shadow-xs transition-all hover:border-zinc-300 hover:bg-zinc-50/60 hover:shadow-md active:scale-[0.98] min-h-[105px] sm:min-h-[125px] h-full"
+            >
+              <div className="flex size-[clamp(2.25rem,9cqw,3rem)] items-center justify-center rounded-xl bg-zinc-100 text-zinc-900 transition-transform group-hover:scale-105">
+                <CalendarDays className="size-[clamp(1.125rem,4.5cqw,1.5rem)] stroke-[1.75]" />
+              </div>
+              <span className="mt-[clamp(0.375rem,2.5cqw,0.75rem)] text-[clamp(0.6875rem,3.2cqw,0.875rem)] font-semibold text-zinc-900 leading-tight text-center whitespace-nowrap overflow-hidden text-ellipsis w-full">
+                Ver agenda completa
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => router.push("/clientes?novo=1")}
+              className="group @container/action flex flex-col items-center justify-center rounded-2xl border border-zinc-200/80 bg-white p-[clamp(0.75rem,4.5cqw,1.25rem)] text-center shadow-xs transition-all hover:border-zinc-300 hover:bg-zinc-50/60 hover:shadow-md active:scale-[0.98] min-h-[105px] sm:min-h-[125px] h-full"
+            >
+              <div className="flex size-[clamp(2.25rem,9cqw,3rem)] items-center justify-center rounded-xl bg-zinc-100 text-zinc-900 transition-transform group-hover:scale-105">
+                <UserCheck className="size-[clamp(1.125rem,4.5cqw,1.5rem)] stroke-[1.75]" />
+              </div>
+              <span className="mt-[clamp(0.375rem,2.5cqw,0.75rem)] text-[clamp(0.6875rem,3.2cqw,0.875rem)] font-semibold text-zinc-900 leading-tight text-center whitespace-nowrap overflow-hidden text-ellipsis w-full">
+                Cadastrar cliente
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => router.push("/vendas?novo=1")}
+              className="group @container/action flex flex-col items-center justify-center rounded-2xl border border-zinc-200/80 bg-white p-[clamp(0.75rem,4.5cqw,1.25rem)] text-center shadow-xs transition-all hover:border-zinc-300 hover:bg-zinc-50/60 hover:shadow-md active:scale-[0.98] min-h-[105px] sm:min-h-[125px] h-full"
+            >
+              <div className="flex size-[clamp(2.25rem,9cqw,3rem)] items-center justify-center rounded-xl bg-zinc-100 text-zinc-900 transition-transform group-hover:scale-105">
+                <ShoppingCart className="size-[clamp(1.125rem,4.5cqw,1.5rem)] stroke-[1.75]" />
+              </div>
+              <span className="mt-[clamp(0.375rem,2.5cqw,0.75rem)] text-[clamp(0.6875rem,3.2cqw,0.875rem)] font-semibold text-zinc-900 leading-tight text-center whitespace-nowrap overflow-hidden text-ellipsis w-full">
+                Registrar venda
+              </span>
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="mt-4 grid gap-4 xl:grid-cols-[1.55fr_1fr]">
