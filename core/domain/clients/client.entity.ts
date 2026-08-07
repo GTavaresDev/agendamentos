@@ -3,6 +3,8 @@ export interface ClientProps {
   name: string;
   email: string;
   phone: string;
+  /** Hash da senha do portal do cliente. Nunca sai em toJSON(). */
+  password?: string | null;
   cpf?: string;
   birthDate?: string;
   status?: "Ativo" | "Inativo";
@@ -10,6 +12,8 @@ export interface ClientProps {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+export type PublicClientProps = Omit<Required<ClientProps>, "password">;
 
 export class Client {
   private props: Required<ClientProps>;
@@ -20,6 +24,7 @@ export class Client {
       name: props.name,
       email: props.email,
       phone: props.phone,
+      password: props.password ?? null,
       cpf: props.cpf || "",
       birthDate: props.birthDate || "",
       status: props.status || "Ativo",
@@ -43,6 +48,10 @@ export class Client {
 
   public get phone(): string {
     return this.props.phone;
+  }
+
+  public get password(): string | null {
+    return this.props.password;
   }
 
   public get cpf(): string {
@@ -74,7 +83,12 @@ export class Client {
     this.props.updatedAt = new Date();
   }
 
-  public updateDetails(details: Partial<Omit<ClientProps, "id" | "createdAt">>): void {
+  public setPassword(passwordHash: string): void {
+    this.props.password = passwordHash;
+    this.props.updatedAt = new Date();
+  }
+
+  public updateDetails(details: Partial<Omit<ClientProps, "id" | "createdAt" | "password">>): void {
     if (details.name) {
       this.props.name = details.name;
       this.props.initials = Client.generateInitials(details.name);
@@ -94,7 +108,9 @@ export class Client {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
 
-  public toJSON(): Required<ClientProps> {
-    return { ...this.props };
+  /** Representação segura: nunca inclui o hash da senha. */
+  public toJSON(): PublicClientProps {
+    const { password: _password, ...safe } = this.props;
+    return safe;
   }
 }

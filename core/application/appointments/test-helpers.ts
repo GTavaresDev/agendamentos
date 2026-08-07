@@ -21,7 +21,10 @@ export function mockAppointmentRepository(): Mocked<AppointmentRepository> {
   return {
     findAll: vi.fn(),
     findByDate: vi.fn(),
+    findByDateRange: vi.fn(),
     findById: vi.fn(),
+    findByClientId: vi.fn(),
+    findByIdAndClientId: vi.fn(),
     save: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),

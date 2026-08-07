@@ -55,6 +55,7 @@ export class PrismaClientRepository implements ClientRepository {
         name: raw.name,
         email: raw.email,
         phone: raw.phone,
+        password: raw.password,
         cpf: raw.cpf,
         birthDate: raw.birthDate,
         status: raw.status,

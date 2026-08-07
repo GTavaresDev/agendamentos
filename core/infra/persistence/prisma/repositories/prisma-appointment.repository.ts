@@ -36,6 +36,51 @@ export class PrismaAppointmentRepository implements AppointmentRepository {
     }
   }
 
+  async findByDateRange(startDate: string, endDate: string): Promise<Appointment[]> {
+    try {
+      const records = await prisma.appointment.findMany({
+        where: { date: { gte: startDate, lte: endDate } },
+        include: withRelations,
+        orderBy: [{ date: "asc" }, { time: "asc" }],
+      });
+      return records.map(AppointmentMapper.toDomain);
+    } catch (error) {
+      console.error("[PrismaAppointmentRepository.findByDateRange] Database query failed:", error);
+      throw error;
+    }
+  }
+
+  async findByClientId(clientId: string): Promise<Appointment[]> {
+    try {
+      const records = await prisma.appointment.findMany({
+        where: { clientId },
+        include: withRelations,
+        orderBy: [{ date: "desc" }, { time: "desc" }],
+      });
+      return records.map(AppointmentMapper.toDomain);
+    } catch (error) {
+      console.error("[PrismaAppointmentRepository.findByClientId] Database query failed:", error);
+      throw error;
+    }
+  }
+
+  async findByIdAndClientId(id: string, clientId: string): Promise<Appointment | null> {
+    try {
+      // A posse faz parte do WHERE: nunca busque só por id no portal do cliente.
+      const record = await prisma.appointment.findFirst({
+        where: { id, clientId },
+        include: withRelations,
+      });
+      return record ? AppointmentMapper.toDomain(record) : null;
+    } catch (error) {
+      console.error(
+        "[PrismaAppointmentRepository.findByIdAndClientId] Database query failed:",
+        error,
+      );
+      throw error;
+    }
+  }
+
   async findById(id: string): Promise<Appointment | null> {
     try {
       const record = await prisma.appointment.findUnique({

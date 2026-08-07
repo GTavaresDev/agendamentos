@@ -75,6 +75,8 @@ model Client {
   name         String
   email        String        @unique
   phone        String
+  /// Senha do portal do cliente (bcrypt). Nulo = cadastro feito internamente, sem acesso ao portal.
+  password     String?
   cpf          String?
   birthDate    String?
   status       String        @default("Ativo")
