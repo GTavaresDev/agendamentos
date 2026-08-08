@@ -16,7 +16,7 @@ export default function ClientSignUpPage() {
       footer={
         <p>
           Já tem conta?{" "}
-          <Link href="/cliente/login" className="font-semibold text-zinc-950 hover:underline">
+          <Link href="/cliente" className="font-semibold text-zinc-950 hover:underline">
             Entrar
           </Link>
         </p>

@@ -8,7 +8,7 @@ import {
   ChartNoAxesCombined,
   ShieldCheck,
   ShoppingBag,
-  Sparkles,
+  Smartphone,
   UserCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -38,6 +38,19 @@ const features = [
       "Histórico completo de atendimentos e serviços",
       "Registro de compras de produtos no balcão",
       "Métricas para identificação de clientes novos e recorrentes",
+    ],
+  },
+  {
+    id: "portal",
+    title: "Portal do cliente",
+    subtitle: "Cada cliente com sua própria área de agendamento",
+    description: "Área exclusiva onde o cliente cria sua conta, marca horários e acompanha os atendimentos — inclusive os que a sua recepção marcou por ele, porque é a mesma agenda.",
+    icon: Smartphone,
+    bullets: [
+      "Login próprio por e-mail e senha ou pela conta Google",
+      "O cliente escolhe serviço, profissional, data e horário livre",
+      "O que a recepção marca aparece no portal dele na hora",
+      "Preços e dados internos nunca são enviados ao cliente",
     ],
   },
   {

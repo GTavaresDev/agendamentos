@@ -15,7 +15,7 @@ export default function ClientPasswordResetPage() {
       footer={
         <p>
           Lembrou a senha?{" "}
-          <Link href="/cliente/login" className="font-semibold text-zinc-950 hover:underline">
+          <Link href="/cliente" className="font-semibold text-zinc-950 hover:underline">
             Entrar
           </Link>
         </p>

@@ -14,6 +14,18 @@ const faqs = [
     answer: "O Agendamentos possui perfis granulares: Administradores gerenciam configurações e DRE; Gestores acompanham relatórios operacionais; Profissionais visualizam sua agenda de atendimentos; e a Recepção realiza agendamentos, cadastros e vendas de balcão.",
   },
   {
+    question: "O cliente consegue marcar o próprio horário?",
+    answer: "Sim. Cada cliente tem sua própria área em /cliente, com login por e-mail e senha ou pela conta Google. Lá ele escolhe o serviço, o profissional, a data e um horário livre, e acompanha ou cancela os atendimentos futuros. O agendamento entra na sua grade como Pendente, aguardando a confirmação da clínica.",
+  },
+  {
+    question: "Se eu marcar pelo painel, o cliente vê no portal dele?",
+    answer: "Vê, na hora. Ao criar o agendamento na recepção você seleciona o cliente na lista, e aquele atendimento passa a aparecer em 'Meus agendamentos' do portal daquela pessoa — com serviço, data, horário e profissional. Não são dois sistemas sincronizando: painel e portal leem o mesmo cadastro e a mesma agenda. Atendimentos criados sem vincular a um cliente cadastrado ficam apenas na agenda interna.",
+  },
+  {
+    question: "O cliente enxerga preços ou dados internos da clínica?",
+    answer: "Não. O que chega ao portal é apenas nome, descrição e duração dos serviços — os valores não saem do servidor. O cliente também não alcança dashboard, relatórios, DRE, vendas, estoque, equipe ou dados de outros clientes: o portal tem sessão própria, separada da sessão da equipe, e nenhum login de cliente concede acesso ao sistema interno.",
+  },
+  {
     question: "Como funciona a venda cruzada no checkout?",
     answer: "Após a conclusão do atendimento na recepção, o operador pode adicionar produtos de manutenção pós-procedimento (como séruns e protetores) ao caixa, realizando a baixa automática em estoque e incluindo o valor no faturamento.",
   },

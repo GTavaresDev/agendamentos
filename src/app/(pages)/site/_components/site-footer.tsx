@@ -12,14 +12,21 @@ export function SiteCtaBanner() {
             Pronto para começar?
           </h2>
           <p className="mt-2 text-sm text-zinc-600">
-            Acesse o painel do sistema e veja o funcionamento completo dos agendamentos e vendas.
+            Veja o painel completo de agendamentos e vendas — ou entre pelo portal e
+            marque seu horário como cliente.
           </p>
-          <div className="mt-7 flex justify-center">
+          <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
               href="/login"
               className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-zinc-950 px-7 text-xs font-semibold text-white shadow-xs transition hover:bg-zinc-800"
             >
               Acessar Painel do Agendamentos <ArrowRight className="size-4" />
+            </Link>
+            <Link
+              href="/cliente"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-7 text-xs font-semibold text-zinc-900 transition hover:bg-zinc-50"
+            >
+              Sou cliente, quero agendar
             </Link>
           </div>
         </div>
@@ -43,7 +50,8 @@ export function SiteFooter() {
         <div className="flex gap-6 font-medium">
           <Link href="/site" className="hover:text-zinc-950">Site Oficial</Link>
           <Link href="/links" className="hover:text-zinc-950">Central de Links</Link>
-          <Link href="/login" className="hover:text-zinc-950">Login</Link>
+          <Link href="/cliente" className="hover:text-zinc-950">Portal do Cliente</Link>
+          <Link href="/login" className="hover:text-zinc-950">Login da Equipe</Link>
         </div>
       </div>
     </footer>

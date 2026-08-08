@@ -5,14 +5,14 @@ export const metadata: Metadata = {
     default: "Portal do cliente",
     template: "%s | Agendamentos",
   },
-  description: "Agende seu atendimento e acompanhe seus horários.",
+  description: "Entre para agendar seu atendimento e acompanhar seus horários.",
   robots: { index: false, follow: false },
 };
 
 /**
- * Portal do cliente. Isolado do sistema interno: nenhuma sidebar, nenhum
- * provider administrativo, nenhuma ação interna alcançável a partir daqui.
+ * Telas públicas de acesso do cliente: login (`/cliente`), cadastro e
+ * recuperação de senha. A área logada fica em /cliente/painel.
  */
-export default function FreeAccessLayout({ children }: { children: React.ReactNode }) {
+export default function ClientAuthLayout({ children }: { children: React.ReactNode }) {
   return children;
 }

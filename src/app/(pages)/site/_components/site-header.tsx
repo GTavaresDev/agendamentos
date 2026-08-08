@@ -27,11 +27,18 @@ export function SiteHeader() {
         <nav className="hidden items-center gap-9 text-sm font-medium text-zinc-600 md:flex">
           <a href="#produto" className="transition hover:text-zinc-950">O Sistema</a>
           <a href="#recursos" className="transition hover:text-zinc-950">Recursos</a>
+          <a href="#portal-do-cliente" className="transition hover:text-zinc-950">Portal do Cliente</a>
           <a href="#faq" className="transition hover:text-zinc-950">Dúvidas</a>
           <Link href="/links" className="transition hover:text-zinc-950">Central de Links</Link>
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
+          <Link
+            href="/cliente"
+            className="inline-flex h-11 items-center justify-center rounded-xl border border-zinc-200 bg-white px-5 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50 active:scale-[0.98]"
+          >
+            Sou Cliente
+          </Link>
           <Link
             href="/login"
             className="inline-flex h-11 items-center justify-center rounded-xl bg-zinc-950 px-6 text-sm font-semibold text-white shadow-xs transition hover:bg-zinc-800 active:scale-[0.98]"
@@ -54,12 +61,20 @@ export function SiteHeader() {
           <nav className="flex flex-col gap-4 text-base font-medium text-zinc-800">
             <a href="#produto" onClick={() => setMobileMenuOpen(false)}>O Sistema</a>
             <a href="#recursos" onClick={() => setMobileMenuOpen(false)}>Recursos</a>
+            <a href="#portal-do-cliente" onClick={() => setMobileMenuOpen(false)}>Portal do Cliente</a>
             <a href="#faq" onClick={() => setMobileMenuOpen(false)}>Dúvidas</a>
             <Link href="/links" onClick={() => setMobileMenuOpen(false)}>Central de Links</Link>
             <Link
+              href="/cliente"
+              onClick={() => setMobileMenuOpen(false)}
+              className="mt-2 flex h-12 items-center justify-center rounded-xl border border-zinc-200 bg-white text-sm font-semibold text-zinc-900"
+            >
+              Sou Cliente
+            </Link>
+            <Link
               href="/login"
               onClick={() => setMobileMenuOpen(false)}
-              className="mt-2 flex h-12 items-center justify-center rounded-xl bg-zinc-950 text-sm font-semibold text-white"
+              className="flex h-12 items-center justify-center rounded-xl bg-zinc-950 text-sm font-semibold text-white"
             >
               Acessar Sistema
             </Link>

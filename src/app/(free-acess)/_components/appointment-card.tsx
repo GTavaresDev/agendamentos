@@ -8,7 +8,7 @@ import { clientStatusLabel, formatDayMonth, getStatusBadgeVariant } from "./port
 export function AppointmentCard({ appointment }: { appointment: ClientAppointmentDTO }) {
   return (
     <Link
-      href={`/cliente/meus-agendamentos/${appointment.id}`}
+      href={`/cliente/painel/meus-agendamentos/${appointment.id}`}
       className="flex items-stretch gap-4 rounded-2xl border border-zinc-200 bg-white p-5 transition hover:border-zinc-300 hover:shadow-md"
     >
       <div className="flex w-20 shrink-0 flex-col items-center justify-center rounded-xl bg-zinc-50/80 py-4 ring-1 ring-inset ring-zinc-200 self-stretch">

@@ -174,7 +174,7 @@ export async function logoutClientAction(): Promise<void> {
   await destroyClientSession();
   // A dispensa do convite de senha vale por sessão: sai junto com ela.
   (await cookies()).delete(PASSWORD_NUDGE_COOKIE);
-  redirect("/cliente/login");
+  redirect("/cliente");
 }
 
 export async function getClientSessionAction(): Promise<ClientSession | null> {

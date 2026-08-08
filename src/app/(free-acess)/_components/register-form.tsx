@@ -37,7 +37,7 @@ export function RegisterForm() {
       return;
     }
 
-    router.replace("/cliente");
+    router.replace("/cliente/painel");
     router.refresh();
   }
 

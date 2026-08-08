@@ -38,8 +38,8 @@ export async function cancelClientAppointmentAction(
       session.clientId,
     );
 
-    revalidatePath("/cliente/meus-agendamentos");
-    revalidatePath("/cliente");
+    revalidatePath("/cliente/painel/meus-agendamentos");
+    revalidatePath("/cliente/painel");
     return { success: true, data: cancelled };
   } catch (error) {
     if (error instanceof ClientAppointmentError) {

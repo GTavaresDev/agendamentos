@@ -6,9 +6,9 @@ import { CalendarPlus, House, ListChecks } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const ITEMS = [
-  { href: "/cliente", label: "Início", icon: House },
-  { href: "/cliente/agendar", label: "Agendar", icon: CalendarPlus },
-  { href: "/cliente/meus-agendamentos", label: "Meus agendamentos", icon: ListChecks },
+  { href: "/cliente/painel", label: "Início", icon: House },
+  { href: "/cliente/painel/agendar", label: "Agendar", icon: CalendarPlus },
+  { href: "/cliente/painel/meus-agendamentos", label: "Meus agendamentos", icon: ListChecks },
 ];
 
 export function PortalNav({
@@ -24,7 +24,7 @@ export function PortalNav({
     <nav className={cn(variant === "sidebar" ? "flex flex-col gap-1" : "items-center gap-1", className)} aria-label="Navegação do portal">
       {ITEMS.map(({ href, label, icon: Icon }) => {
         const isActive =
-          pathname === href || (href !== "/cliente" && pathname.startsWith(`${href}/`));
+          pathname === href || (href !== "/cliente/painel" && pathname.startsWith(`${href}/`));
 
         if (variant === "sidebar") {
           return (

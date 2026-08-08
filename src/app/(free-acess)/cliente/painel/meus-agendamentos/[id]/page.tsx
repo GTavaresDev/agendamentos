@@ -3,15 +3,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Badge } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/badge";
-import { getClientAppointmentAction } from "../../../_actions/portal-appointment-actions";
-import { CancelAppointmentButton } from "../../../_components/cancel-appointment-button";
+import { getClientAppointmentAction } from "../../../../_actions/portal-appointment-actions";
+import { CancelAppointmentButton } from "../../../../_components/cancel-appointment-button";
 import {
   clientStatusLabel,
   formatDate,
   formatFriendlyDate,
   getStatusBadgeVariant,
-} from "../../../_components/portal-format";
-import { PortalShell, requireCompletePortalSession } from "../../../_components/portal-shell";
+} from "../../../../_components/portal-format";
+import { PortalShell, requireCompletePortalSession } from "../../../../_components/portal-shell";
 
 export const metadata: Metadata = {
   title: "Detalhes do agendamento",
@@ -34,7 +34,7 @@ export default async function AppointmentDetailPage({
   return (
     <PortalShell session={session}>
       <Link
-        href="/cliente/meus-agendamentos"
+        href="/cliente/painel/meus-agendamentos"
         className="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-500 transition hover:text-zinc-950"
       >
         <ArrowLeft className="size-4" /> Meus agendamentos

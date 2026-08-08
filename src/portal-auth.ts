@@ -28,8 +28,8 @@ import {
  * Credenciais vêm só do ambiente: AUTH_GOOGLE_ID / AUTH_GOOGLE_SECRET / AUTH_SECRET.
  */
 export const PORTAL_AUTH_BASE_PATH = "/api/cliente/auth";
-export const PORTAL_LOGIN_PATH = "/cliente/login";
-export const PORTAL_HOME_PATH = "/cliente";
+export const PORTAL_LOGIN_PATH = "/cliente";
+export const PORTAL_HOME_PATH = "/cliente/painel";
 
 const resolveAccount = new ResolveOAuthClientAccount(
   new PrismaClientRepository(),

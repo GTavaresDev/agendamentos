@@ -34,7 +34,7 @@ export function LoginForm() {
       return;
     }
 
-    router.replace("/cliente");
+    router.replace("/cliente/painel");
     router.refresh();
   }
 

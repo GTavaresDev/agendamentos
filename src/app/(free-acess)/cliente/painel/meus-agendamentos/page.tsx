@@ -3,14 +3,14 @@ import Link from "next/link";
 import { CalendarPlus, ChevronRight } from "lucide-react";
 import { Badge } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/badge";
 import { Button } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/button";
-import { getClientAppointmentsAction } from "../../_actions/portal-appointment-actions";
-import { AppointmentCard } from "../../_components/appointment-card";
+import { getClientAppointmentsAction } from "../../../_actions/portal-appointment-actions";
+import { AppointmentCard } from "../../../_components/appointment-card";
 import {
   clientStatusLabel,
   formatDate,
   getStatusBadgeVariant,
-} from "../../_components/portal-format";
-import { PortalShell, requireCompletePortalSession } from "../../_components/portal-shell";
+} from "../../../_components/portal-format";
+import { PortalShell, requireCompletePortalSession } from "../../../_components/portal-shell";
 
 export const metadata: Metadata = {
   title: "Meus agendamentos",
@@ -29,7 +29,7 @@ export default async function MyAppointmentsPage() {
       <div className="w-full">
         <div className="flex items-center justify-end">
           <Button size="sm" asChild>
-            <Link href="/cliente/agendar">
+            <Link href="/cliente/painel/agendar">
               <CalendarPlus className="size-4 mr-1.5" /> Novo agendamento
             </Link>
           </Button>
@@ -88,7 +88,7 @@ export default async function MyAppointmentsPage() {
                       </td>
                       <td className="px-5 py-4 text-right">
                         <Button size="sm" variant="ghost" asChild>
-                          <Link href={`/cliente/meus-agendamentos/${appointment.id}`}>
+                          <Link href={`/cliente/painel/meus-agendamentos/${appointment.id}`}>
                             Ver detalhes <ChevronRight className="size-3.5 ml-1" />
                           </Link>
                         </Button>

@@ -12,14 +12,14 @@ import { getClientProfileStatusAction } from "../_actions/portal-profile-actions
 export async function requirePortalSession(): Promise<ClientSession> {
   const session = await getClientSession();
   if (!session) {
-    redirect("/cliente/login");
+    redirect("/cliente");
   }
   return session;
 }
 
 /**
- * Guarda das páginas internas do portal. Além da sessão, exige cadastro
- * completo: sem telefone e data de nascimento, tudo volta para `/cliente`,
+ * Guarda das telas internas do painel. Além da sessão, exige cadastro
+ * completo: sem telefone e data de nascimento, tudo volta para `/cliente/painel`,
  * que mostra o formulário de conclusão no lugar do conteúdo.
  *
  * Isto é conveniência de navegação — a barreira que vale é a das use cases
@@ -29,7 +29,7 @@ export async function requireCompletePortalSession(): Promise<ClientSession> {
   const session = await requirePortalSession();
   const { complete } = await getClientProfileStatusAction();
   if (!complete) {
-    redirect("/cliente");
+    redirect("/cliente/painel");
   }
   return session;
 }
@@ -64,7 +64,7 @@ export function PortalShell({
       {/* Sidebar Persistente no Desktop */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-[256px] flex-col border-r border-zinc-200 bg-white p-4 lg:flex">
         <div className="flex h-20 items-center px-3 border-b border-zinc-100">
-          <Link href="/cliente" aria-label="Ir para o início">
+          <Link href="/cliente/painel" aria-label="Ir para o início">
             <AgendamentosLogo variant="light" size="md" />
           </Link>
         </div>
@@ -102,7 +102,7 @@ export function PortalShell({
       {/* Header Mobile */}
       <header className="sticky top-0 z-30 border-b border-zinc-200 bg-white/95 backdrop-blur shadow-xs lg:hidden">
         <div className="mx-auto flex h-16 w-full items-center justify-between gap-4 px-4 sm:px-6">
-          <Link href="/cliente" aria-label="Ir para o início" className="shrink-0">
+          <Link href="/cliente/painel" aria-label="Ir para o início" className="shrink-0">
             <AgendamentosLogo variant="light" size="sm" />
           </Link>
 

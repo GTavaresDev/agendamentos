@@ -365,10 +365,10 @@ function BookingSuccess({ appointment }: { appointment: ClientAppointmentDTO }) 
 
       <div className="mt-6 flex flex-col gap-2 sm:flex-row">
         <Button className="w-full" size="lg" asChild>
-          <Link href="/cliente/meus-agendamentos">Ver meus agendamentos</Link>
+          <Link href="/cliente/painel/meus-agendamentos">Ver meus agendamentos</Link>
         </Button>
         <Button className="w-full" size="lg" variant="outline" asChild>
-          <Link href="/cliente">Voltar para início</Link>
+          <Link href="/cliente/painel">Voltar para início</Link>
         </Button>
       </div>
     </div>

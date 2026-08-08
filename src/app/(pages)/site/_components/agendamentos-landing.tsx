@@ -5,6 +5,7 @@ import { SiteHero } from "./site-hero";
 import { ProductMockup } from "./product-mockup";
 import { SiteStats } from "./site-stats";
 import { SiteFeatures } from "./site-features";
+import { SiteClientPortal } from "./site-client-portal";
 import { SiteFaq } from "./site-faq";
 import { SiteCtaBanner, SiteFooter } from "./site-footer";
 
@@ -17,6 +18,7 @@ export function AgendamentosLanding() {
         <ProductMockup />
         <SiteStats />
         <SiteFeatures />
+        <SiteClientPortal />
         <SiteFaq />
         <SiteCtaBanner />
       </main>

@@ -4,7 +4,7 @@ O **Agendamentos** é uma solução completa de gestão operacional e financeira
 
 O sistema unifica em uma única plataforma a **agenda de atendimentos**, o **relacionamento com clientes**, o **controle de caixa e vendas de produtos**, a **gestão da equipe profissional** e **relatórios de inteligência de negócios**.
 
-A plataforma tem **duas portas de entrada independentes**: o **painel interno** (`/dashboard`), usado pela equipe da clínica, e o **Portal do Cliente** (`/cliente`), onde a própria pessoa cria sua conta, agenda e acompanha seus atendimentos. Os dois enxergam **o mesmo cadastro e a mesma agenda** — um agendamento feito pela recepção aparece na hora no portal do cliente, e vice-versa.
+A plataforma tem **duas portas de entrada independentes**: o **painel interno** (`/dashboard`), usado pela equipe da clínica, e o **Portal do Cliente** (`/cliente` para entrar, `/cliente/painel` depois de logado), onde a própria pessoa cria sua conta, agenda e acompanha seus atendimentos. Os dois enxergam **o mesmo cadastro e a mesma agenda** — um agendamento feito pela recepção aparece na hora no portal do cliente, e vice-versa.
 
 ---
 
@@ -65,7 +65,23 @@ O objetivo principal da plataforma é eliminar falhas na agenda, automatizar o f
 
 ### 6. 🙋 Portal do Cliente (Autoatendimento)
 
-Área pública em `/cliente`, com identidade visual própria e **totalmente isolada** do sistema interno. O cliente entra sozinho, agenda sozinho e acompanha seus horários sem depender da recepção.
+Acesso em `/cliente` e área logada em `/cliente/painel`, com identidade visual própria e **totalmente isolada** do sistema interno. O cliente entra sozinho, agenda sozinho e acompanha seus horários sem depender da recepção.
+
+#### Rotas
+
+As duas metades são separadas por rota: `/cliente` é a porta de entrada, `/cliente/painel` é o que só existe depois do login.
+
+| Rota | Acesso | Tela |
+|---|---|---|
+| `/cliente` | Público | Login do cliente (senha ou Google) |
+| `/cliente/cadastro` | Público | Criar conta |
+| `/cliente/recuperar-senha` | Público | Recuperação de senha |
+| `/cliente/painel` | **Exige sessão** | Início: próximo atendimento e atalhos |
+| `/cliente/painel/agendar` | **Exige sessão** | Fluxo de novo agendamento |
+| `/cliente/painel/meus-agendamentos` | **Exige sessão** | Próximos e histórico |
+| `/cliente/painel/meus-agendamentos/[id]` | **Exige sessão** | Detalhe e cancelamento |
+
+Sem sessão de cliente, qualquer rota de `/cliente/painel` redireciona para `/cliente`. Com sessão, as telas de acesso redirecionam para `/cliente/painel`. A validação acontece no middleware **e** de novo em cada página — a autorização não depende da camada de rota.
 
 #### Conta e Login Próprios
 - **Login independente da equipe**: O portal tem sessão própria, separada da sessão do painel interno. Uma credencial de cliente **nunca** abre o sistema da clínica, e uma credencial da equipe não vale como sessão de cliente.
@@ -77,8 +93,8 @@ O objetivo principal da plataforma é eliminar falhas na agenda, automatizar o f
 - **Completar cadastro obrigatório**: Telefone e data de nascimento não vêm do Google. Enquanto faltarem, o portal fica **travado** numa tela de conclusão — sem agendar e sem navegar. A trava é validada no servidor, não só na tela.
 
 #### O que o cliente faz sozinho
-- **Agendar** (`/cliente/agendar`): fluxo guiado de **serviço → profissional → data → horário → confirmação**, com apenas os horários realmente livres.
-- **Acompanhar** (`/cliente/meus-agendamentos`): próximos atendimentos e histórico, com detalhes de serviço, duração, profissional e status.
+- **Agendar** (`/cliente/painel/agendar`): fluxo guiado de **serviço → profissional → data → horário → confirmação**, com apenas os horários realmente livres.
+- **Acompanhar** (`/cliente/painel/meus-agendamentos`): próximos atendimentos e histórico, com detalhes de serviço, duração, profissional e status.
 - **Cancelar**: o próprio cliente cancela atendimentos futuros, liberando o horário na grade da clínica na hora.
 - **Sair**: encerramento de sessão pelo próprio portal.
 
@@ -157,7 +173,7 @@ Para apresentações comerciais e validação do sistema, o projeto conta com um
 - **Administrador**: `admin@agendamentos.com` | **Senha**: `zxcasd`
 - **Profissional / Gabriel**: `gabriel@agendamentos.com` | **Senha**: `lkjh-poiu-zxc10`
 
-**Portal do cliente** — [http://localhost:3000/cliente/login](http://localhost:3000/cliente/login)
+**Portal do cliente** — [http://localhost:3000/cliente](http://localhost:3000/cliente)
 
 Os clientes gerados pelo seed existem como ficha na clínica, mas ainda **sem senha de portal** — é assim que o cliente cadastrado pela recepção nasce. Para demonstrar o autoatendimento, crie a conta em `/cliente/cadastro` usando o **mesmo e-mail e telefone** de um cliente do seed: o sistema reconhece a ficha existente e a pessoa entra já com todo o histórico de atendimentos dela.
 

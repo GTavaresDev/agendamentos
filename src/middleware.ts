@@ -12,30 +12,36 @@ const staffMiddleware = NextAuth(authConfig).auth as unknown as (
   event: NextFetchEvent,
 ) => Promise<Response | undefined>;
 
-const PORTAL_ROOT = "/cliente";
-const PORTAL_PUBLIC_PATHS = [
-  `${PORTAL_ROOT}/login`,
-  `${PORTAL_ROOT}/cadastro`,
-  `${PORTAL_ROOT}/recuperar-senha`,
-];
+/** Telas públicas de acesso do cliente: login, cadastro e recuperação. */
+const PORTAL_AUTH_ROOT = "/cliente";
+/** Área logada do cliente. Tudo aqui exige sessão de cliente. */
+const PORTAL_HOME = "/cliente/painel";
+
+function isUnder(pathname: string, root: string): boolean {
+  return pathname === root || pathname.startsWith(`${root}/`);
+}
 
 /**
  * O portal do cliente tem sessão própria. Nem a sessão da equipe libera as
  * rotas do cliente, nem a do cliente libera o sistema interno — cada branch
  * valida o seu cookie. A autorização real continua nas Server Actions/páginas.
+ *
+ * A separação de rotas é só de navegação: `/cliente` são as telas de acesso e
+ * `/cliente/painel` é o que só quem está logado vê.
  */
 async function portalMiddleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isPublic = PORTAL_PUBLIC_PATHS.includes(pathname);
+  const isProtected = isUnder(pathname, PORTAL_HOME);
   const token = request.cookies.get(clientSessionCookieName())?.value;
   const session = token ? await decodeClientSessionToken(token) : null;
 
-  if (session && isPublic) {
-    return NextResponse.redirect(new URL(PORTAL_ROOT, request.nextUrl));
+  // Já logado não fica preso nas telas de acesso.
+  if (session && !isProtected) {
+    return NextResponse.redirect(new URL(PORTAL_HOME, request.nextUrl));
   }
 
-  if (!session && !isPublic) {
-    return NextResponse.redirect(new URL(`${PORTAL_ROOT}/login`, request.nextUrl));
+  if (!session && isProtected) {
+    return NextResponse.redirect(new URL(PORTAL_AUTH_ROOT, request.nextUrl));
   }
 
   return NextResponse.next();
@@ -44,7 +50,8 @@ async function portalMiddleware(request: NextRequest) {
 export default async function middleware(request: NextRequest, event: NextFetchEvent) {
   const { pathname } = request.nextUrl;
 
-  if (pathname === PORTAL_ROOT || pathname.startsWith(`${PORTAL_ROOT}/`)) {
+  // /cliente/painel mora dentro de /cliente, então um teste cobre os dois.
+  if (isUnder(pathname, PORTAL_AUTH_ROOT)) {
     return portalMiddleware(request);
   }
 
