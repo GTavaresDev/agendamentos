@@ -1,4 +1,4 @@
-import { decode } from "@auth/core/jwt";
+import { decode, encode } from "@auth/core/jwt";
 import { beforeAll, describe, expect, it } from "vitest";
 import {
   clientSessionCookieName,
@@ -62,5 +62,54 @@ describe("token de sessão do portal", () => {
   it("token adulterado é rejeitado", async () => {
     const token = await encodeClientSessionToken(session);
     expect(await decodeClientSessionToken(`${token}x`)).toBeNull();
+  });
+});
+
+/**
+ * "Ver como cliente": a identidade efetiva é a do cliente, mas o token carrega
+ * assinado quem de fato está olhando. Nada disso é editável pelo navegador.
+ */
+describe("visualização como cliente", () => {
+  const impersonated = {
+    ...session,
+    impersonatorId: "admin-1",
+    impersonatorName: "Ana Admin",
+    impersonationStartedAt: "2026-08-08T12:00:00.000Z",
+  };
+
+  it("preserva o cliente efetivo e o administrador de origem", async () => {
+    const token = await encodeClientSessionToken(impersonated);
+
+    expect(await decodeClientSessionToken(token)).toEqual(impersonated);
+  });
+
+  it("sessão de cliente comum não vem marcada como visualização", async () => {
+    const token = await encodeClientSessionToken(session);
+    const decoded = await decodeClientSessionToken(token);
+
+    expect(decoded?.impersonatorId).toBeUndefined();
+    expect(decoded?.impersonatorName).toBeUndefined();
+  });
+
+  it("cliente não forja uma visualização sem o segredo", async () => {
+    const forged = await encode({
+      token: { ...impersonated, sub: impersonated.clientId },
+      secret: "outro-segredo",
+      salt: clientSessionCookieName(),
+    });
+
+    expect(await decodeClientSessionToken(forged)).toBeNull();
+  });
+
+  it("visualização não vale como sessão da equipe", async () => {
+    const token = await encodeClientSessionToken(impersonated);
+
+    await expect(
+      decode({
+        token,
+        secret: process.env.AUTH_SECRET!,
+        salt: sessionCookieName(),
+      }),
+    ).rejects.toThrow();
   });
 });

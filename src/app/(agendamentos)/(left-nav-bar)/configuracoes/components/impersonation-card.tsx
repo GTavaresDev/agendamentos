@@ -12,6 +12,8 @@ import {
   CardTitle,
 } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/card";
 import { Input } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/input";
+import { ListPagination } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/list-pagination";
+import { paginateItems, TABLE_BODY_MIN_HEIGHT_CLASS } from "@/lib/pagination";
 import { cn } from "@/lib/utils";
 import { useAppShell } from "@/app/(agendamentos)/(left-nav-bar)/_providers/use-app-shell";
 import { useUsers } from "@/app/(agendamentos)/(left-nav-bar)/usuarios/hooks/use-users";
@@ -22,6 +24,7 @@ export function ImpersonationCard() {
   const { userList } = useUsers();
 
   const [userSearch, setUserSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [impersonatingLoading, setImpersonatingLoading] = useState(false);
 
   const availableUsers = useMemo(() => {
@@ -40,6 +43,11 @@ export function ImpersonationCard() {
         (u.status && u.status.toLowerCase().includes(q))
     );
   }, [availableUsers, userSearch]);
+
+  const pagedUsers = useMemo(
+    () => paginateItems(filteredUsers, page),
+    [filteredUsers, page],
+  );
 
   async function onStartImpersonation(targetUserId: string) {
     setImpersonatingLoading(true);
@@ -120,15 +128,19 @@ export function ImpersonationCard() {
               type="text"
               placeholder="Buscar por nome, e-mail, cargo ou status..."
               value={userSearch}
-              onChange={(e) => setUserSearch(e.target.value)}
+              onChange={(e) => {
+                setUserSearch(e.target.value);
+                // Busca nova recomeça na primeira página.
+                setPage(1);
+              }}
               className="pl-9 h-10 text-xs"
             />
           </div>
 
           <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-2xs">
-            <div className="overflow-x-auto max-h-[420px]">
+            <div className={cn("overflow-x-auto", TABLE_BODY_MIN_HEIGHT_CLASS)}>
               <table className="w-full text-left text-xs text-zinc-600">
-                <thead className="sticky top-0 z-10 border-b border-zinc-200 bg-zinc-50 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                <thead className="border-b border-zinc-200 bg-zinc-50 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
                   <tr>
                     <th scope="col" className="px-4 py-3 text-left">Usuário</th>
                     <th scope="col" className="px-4 py-3 text-left">Cargo / Função</th>
@@ -138,14 +150,14 @@ export function ImpersonationCard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100">
-                  {filteredUsers.length === 0 ? (
+                  {pagedUsers.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="py-12 text-center text-zinc-400">
                         Nenhum usuário encontrado para a busca.
                       </td>
                     </tr>
                   ) : (
-                    filteredUsers.map((u) => {
+                    pagedUsers.map((u) => {
                       const isUserActive = u.status === "Ativo";
                       return (
                         <tr
@@ -208,6 +220,13 @@ export function ImpersonationCard() {
                 </tbody>
               </table>
             </div>
+
+            <ListPagination
+              page={page}
+              totalItems={filteredUsers.length}
+              onPageChange={setPage}
+              label="usuários"
+            />
           </div>
         </CardContent>
       </Card>

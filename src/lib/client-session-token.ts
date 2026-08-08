@@ -13,6 +13,15 @@ export type ClientSession = {
   name: string;
   email: string;
   initials: string;
+  /**
+   * Preenchido só quando um administrador está vendo o portal como este
+   * cliente. Vai dentro do token assinado — o navegador não consegue inventar
+   * nem apagar esses campos sem o AUTH_SECRET.
+   */
+  impersonatorId?: string;
+  impersonatorName?: string;
+  /** ISO. Início da visualização. */
+  impersonationStartedAt?: string;
 };
 
 type ClientSessionToken = ClientSession & { sub?: string };
@@ -67,6 +76,13 @@ export async function decodeClientSessionToken(
       name: payload.name,
       email: payload.email,
       initials: payload.initials,
+      ...(payload.impersonatorId
+        ? {
+            impersonatorId: payload.impersonatorId,
+            impersonatorName: payload.impersonatorName,
+            impersonationStartedAt: payload.impersonationStartedAt,
+          }
+        : {}),
     };
   } catch {
     return null;

@@ -1,13 +1,24 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { z } from "zod";
+import {
+  ImpersonateClient,
+  ImpersonationError,
+} from "@core/application/portal/impersonate-client.usecase";
 import {
   AuthenticateUser,
   AuthenticationError,
 } from "@core/application/users/authenticate-user.usecase";
 import { resolvePermissionLevel } from "@core/domain/users/resolve-permission-level.business-rule";
+import { PrismaClientRepository } from "@core/infra/persistence/prisma/repositories/prisma-client.repository";
 import { PrismaUserRepository } from "@core/infra/persistence/prisma/repositories/prisma-user.repository";
 import { auth, signOut } from "@/auth";
+import {
+  createClientSession,
+  destroyClientSession,
+  getClientSession,
+} from "@/lib/client-session";
 import {
   createAuthSession,
   readAuthSessionPayload,
@@ -201,4 +212,84 @@ export async function stopImpersonationAction(): Promise<{
   } catch (error: unknown) {
     return { success: false, error: formatActionError(error, "Erro ao sair da conta.") };
   }
+}
+
+/**
+ * Trilha de auditoria da visualização.
+ *
+ * ponytail: o projeto não tem tabela de auditoria; o registro vai para o log
+ * do servidor, que já é onde os erros de ação são registrados. Vira tabela
+ * quando houver um módulo de auditoria de verdade. Nunca loga token, senha ou
+ * segredo — só ids e horário.
+ */
+function logImpersonation(
+  event: "inicio" | "fim",
+  adminId: string,
+  clientId: string,
+): void {
+  console.info(
+    `[impersonation][cliente] ${event} adminId=${adminId} clientId=${clientId} at=${new Date().toISOString()}`,
+  );
+}
+
+/**
+ * "Ver como cliente": abre a sessão do PORTAL com a identidade efetiva do
+ * cliente escolhido.
+ *
+ * O cookie da equipe não é tocado — o administrador continua autenticado por
+ * baixo e volta ao sistema interno sem login. Nenhuma senha é lida, criada ou
+ * verificada, e o Google não entra no caminho.
+ */
+export async function startClientImpersonationAction(
+  clientId: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const payload = await readAuthSessionPayload();
+    const actor = resolveActor(payload);
+
+    if (!actor) {
+      return { success: false, error: "Faça login para continuar." };
+    }
+
+    const account = await new ImpersonateClient(new PrismaClientRepository()).execute(
+      {
+        id: actor.id,
+        name: actor.name,
+        role: actor.role,
+        impersonating: Boolean(payload?.impersonating),
+      },
+      clientId,
+    );
+
+    await createClientSession(account, { id: actor.id, name: actor.name });
+    logImpersonation("inicio", actor.id, account.id);
+
+    return { success: true };
+  } catch (error: unknown) {
+    if (error instanceof ImpersonationError) {
+      return { success: false, error: error.message };
+    }
+    return {
+      success: false,
+      error: formatActionError(error, "Erro ao entrar como cliente."),
+    };
+  }
+}
+
+/**
+ * Encerra a visualização e devolve o administrador ao sistema interno.
+ *
+ * Só derruba a sessão do portal se ela for de fato uma visualização — um
+ * cliente de verdade chamando isto não é deslogado.
+ */
+export async function stopClientImpersonationAction(): Promise<void> {
+  const session = await getClientSession();
+
+  if (!session?.impersonatorId) {
+    redirect("/cliente/painel");
+  }
+
+  logImpersonation("fim", session.impersonatorId, session.clientId);
+  await destroyClientSession();
+  redirect("/configuracoes");
 }

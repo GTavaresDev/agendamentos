@@ -18,13 +18,31 @@ import {
  */
 export type { ClientSession };
 
-export async function createClientSession(account: ClientAccountDTO): Promise<void> {
+/**
+ * Grava a sessão do portal.
+ *
+ * `impersonator` só é preenchido pelo "Ver como cliente" da equipe: a sessão
+ * passa a ter a identidade efetiva do cliente, mas carrega assinado quem de
+ * fato está olhando. O cookie da equipe não é tocado em nenhum caminho — é ele
+ * que devolve o administrador ao sistema interno.
+ */
+export async function createClientSession(
+  account: ClientAccountDTO,
+  impersonator?: { id: string; name: string },
+): Promise<void> {
   const secure = isSecureClientCookie();
   const encoded = await encodeClientSessionToken({
     clientId: account.id,
     name: account.name,
     email: account.email,
     initials: account.initials,
+    ...(impersonator
+      ? {
+          impersonatorId: impersonator.id,
+          impersonatorName: impersonator.name,
+          impersonationStartedAt: new Date().toISOString(),
+        }
+      : {}),
   });
 
   const cookieStore = await cookies();

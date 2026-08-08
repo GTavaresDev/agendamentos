@@ -12,6 +12,7 @@ import { useAppShell } from "@/app/(agendamentos)/(left-nav-bar)/_providers/use-
 import { SchedulingRulesCard } from "./scheduling-rules-card";
 import { PermissionsCard } from "./permissions-card";
 import { ImpersonationCard } from "./impersonation-card";
+import { ClientImpersonationCard } from "./client-impersonation-card";
 
 export function SettingsView() {
   const { currentUser } = useAppShell();
@@ -19,6 +20,8 @@ export function SettingsView() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
       <ImpersonationCard />
+
+      <ClientImpersonationCard />
 
       <SchedulingRulesCard />
 

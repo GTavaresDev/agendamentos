@@ -4,6 +4,7 @@ import { Avatar } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/avata
 import { AgendamentosLogo } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/agendamentos-logo";
 import { getClientSession, type ClientSession } from "@/lib/client-session";
 import { getClientProfileStatusAction } from "../_actions/portal-profile-actions";
+import { ImpersonationBanner } from "./impersonation-banner";
 
 /**
  * Guarda das páginas do portal. O middleware já redireciona, mas cada página
@@ -80,6 +81,10 @@ export function PortalShell({
         )}
 
         <div className="mt-auto space-y-1">
+          {/* Só aparece quando a equipe está vendo o portal como este cliente. */}
+          {session.impersonatorName ? (
+            <ImpersonationBanner clientName={session.name} className="mb-2" />
+          ) : null}
           <div className="my-2 h-px bg-zinc-100" />
           <div className="relative flex items-center gap-3 rounded-xl p-2.5 bg-zinc-50/80 border border-zinc-100">
             <Avatar
@@ -114,6 +119,14 @@ export function PortalShell({
             <LogoutButton />
           </div>
         </div>
+
+        {/* Sem sidebar no celular: a faixa acompanha o cabeçalho. */}
+        {session.impersonatorName ? (
+          <ImpersonationBanner
+            clientName={session.name}
+            className="mx-4 mb-2 sm:mx-6"
+          />
+        ) : null}
       </header>
 
       {/* Conteúdo Principal */}
