@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 3000
+    },
+    {
+      "name": "harmonize-real",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "/Users/gabrieltavares/apps/harmonize", "run", "dev", "--", "-p", "3001"],
+      "port": 3001
     }
   ]
 }

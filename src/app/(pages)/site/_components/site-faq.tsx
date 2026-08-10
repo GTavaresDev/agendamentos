@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { FadeIn } from "@/components/ui/animation/fade-in";
 
 const faqs = [
   {
@@ -41,34 +43,58 @@ export function SiteFaq() {
   return (
     <section id="faq" className="py-20 lg:py-28 bg-white border-b border-zinc-200">
       <div className="mx-auto max-w-4xl px-6 lg:px-8">
-        <div className="text-center">
-          <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Perguntas Frequentes</span>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight text-zinc-950">
-            Dúvidas sobre o sistema
-          </h2>
-        </div>
+        <FadeIn variant="up">
+          <div className="text-center">
+            <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Perguntas Frequentes</span>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-zinc-950">
+              Dúvidas sobre o sistema
+            </h2>
+          </div>
+        </FadeIn>
 
-        <div className="mt-12 divide-y divide-zinc-200 rounded-2xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-xs">
-          {faqs.map((faq, idx) => (
-            <div key={idx} className="py-5 first:pt-0 last:pb-0">
-              <button
-                onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                className="flex w-full items-center justify-between text-left font-semibold text-zinc-900 transition hover:text-zinc-600"
-              >
-                <span className="text-base sm:text-lg">{faq.question}</span>
-                <ChevronDown
-                  className={cn("size-5 shrink-0 text-zinc-400 transition-transform duration-200", openFaq === idx && "rotate-180 text-zinc-950")}
-                />
-              </button>
-              {openFaq === idx && (
-                <p className="mt-3 text-sm leading-relaxed text-zinc-600">
-                  {faq.answer}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
+        <FadeIn variant="up" delay={0.15}>
+          <div className="mt-12 divide-y divide-zinc-200 rounded-2xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-xs">
+            {faqs.map((faq, idx) => {
+              const isOpen = openFaq === idx;
+              return (
+                <div key={idx} className="py-5 first:pt-0 last:pb-0">
+                  <button
+                    onClick={() => setOpenFaq(isOpen ? null : idx)}
+                    className="flex w-full items-center justify-between text-left font-semibold text-zinc-900 transition hover:text-zinc-600 focus-visible:outline-none"
+                  >
+                    <span className="text-base sm:text-lg">{faq.question}</span>
+                    <motion.div
+                      animate={{ rotate: isOpen ? 180 : 0 }}
+                      transition={{ duration: 0.25, ease: "easeInOut" }}
+                    >
+                      <ChevronDown
+                        className={cn("size-5 shrink-0 transition-colors", isOpen ? "text-zinc-950" : "text-zinc-400")}
+                      />
+                    </motion.div>
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
+                        className="overflow-hidden"
+                      >
+                        <p className="mt-3 text-sm leading-relaxed text-zinc-600 pt-1">
+                          {faq.answer}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </div>
+        </FadeIn>
       </div>
     </section>
   );
 }
+

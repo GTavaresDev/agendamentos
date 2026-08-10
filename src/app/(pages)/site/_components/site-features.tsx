@@ -10,8 +10,12 @@ import {
   ShoppingBag,
   Smartphone,
   UserCheck,
+  Check,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { FadeIn } from "@/components/ui/animation/fade-in";
+import { StaggerContainer, StaggerItem } from "@/components/ui/animation/stagger-container";
 
 const features = [
   {
@@ -98,20 +102,22 @@ export function SiteFeatures() {
   const [activeTab, setActiveTab] = useState(0);
 
   return (
-    <section id="recursos" className="py-20 lg:py-28 bg-white border-b border-zinc-100">
+    <section id="recursos" className="py-20 lg:py-28 bg-white border-b border-zinc-100 overflow-hidden">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Recursos da Plataforma</span>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight text-zinc-950 sm:text-4xl">
-            Tudo o que seu estabelecimento precisa
-          </h2>
-          <p className="mt-3 text-base text-zinc-600">
-            Desenvolvido com foco na rotina de recepções, profissionais de saúde/estética e gestores.
-          </p>
-        </div>
+        <FadeIn variant="up">
+          <div className="mx-auto max-w-2xl text-center">
+            <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Recursos da Plataforma</span>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-zinc-950 sm:text-4xl">
+              Tudo o que seu estabelecimento precisa
+            </h2>
+            <p className="mt-3 text-base text-zinc-600">
+              Desenvolvido com foco na rotina de recepções, profissionais de saúde/estética e gestores.
+            </p>
+          </div>
+        </FadeIn>
 
-        {/* Feature Tabs */}
-        <div className="mt-12 flex justify-start md:justify-center overflow-x-auto pb-2 gap-2.5">
+        {/* Feature Tabs with Sliding Pill Animation */}
+        <div className="mt-12 flex justify-start md:justify-center overflow-x-auto pb-2 gap-2.5 scrollbar-none">
           {features.map((feat, idx) => {
             const Icon = feat.icon;
             const active = activeTab === idx;
@@ -120,79 +126,100 @@ export function SiteFeatures() {
                 key={feat.id}
                 onClick={() => setActiveTab(idx)}
                 className={cn(
-                  "flex shrink-0 items-center gap-2.5 rounded-xl border px-4 py-3 text-xs font-semibold transition-all",
-                  active
-                    ? "border-zinc-950 bg-zinc-950 text-white shadow-xs"
-                    : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 hover:text-zinc-950"
+                  "relative flex shrink-0 items-center gap-2.5 rounded-xl px-4 py-3 text-xs font-semibold transition-colors focus-visible:outline-none",
+                  active ? "text-white" : "border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 hover:text-zinc-950"
                 )}
               >
-                <Icon className="size-4" />
-                <span>{feat.title}</span>
+                {active && (
+                  <motion.div
+                    layoutId="activeFeatureTab"
+                    className="absolute inset-0 rounded-xl bg-zinc-950 shadow-xs"
+                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2.5">
+                  <Icon className="size-4" />
+                  <span>{feat.title}</span>
+                </span>
               </button>
             );
           })}
         </div>
 
-        {/* Active Feature Detail Card */}
-        <div className="mt-8 rounded-2xl border border-zinc-200 bg-zinc-50 p-8 lg:p-12 shadow-xs">
-          <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
-            <div className="lg:col-span-7">
-              <span className="inline-block rounded-md border border-zinc-200 bg-white px-3 py-1 text-xs font-semibold text-zinc-700">
-                {features[activeTab].subtitle}
-              </span>
-              <h3 className="mt-4 text-2xl font-bold text-zinc-950 sm:text-3xl">
-                {features[activeTab].title}
-              </h3>
-              <p className="mt-3 text-sm leading-relaxed text-zinc-600">
-                {features[activeTab].description}
-              </p>
+        {/* Active Feature Detail Card with AnimatePresence */}
+        <div className="mt-8">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.35, ease: [0.21, 0.47, 0.32, 0.98] }}
+              className="rounded-2xl border border-zinc-200 bg-zinc-50 p-8 lg:p-12 shadow-xs"
+            >
+              <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
+                <div className="lg:col-span-7">
+                  <span className="inline-block rounded-md border border-zinc-200 bg-white px-3 py-1 text-xs font-semibold text-zinc-700 shadow-2xs">
+                    {features[activeTab].subtitle}
+                  </span>
+                  <h3 className="mt-4 text-2xl font-bold text-zinc-950 sm:text-3xl">
+                    {features[activeTab].title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-relaxed text-zinc-600">
+                    {features[activeTab].description}
+                  </p>
 
-              <div className="mt-6 space-y-3">
-                {features[activeTab].bullets.map((b, i) => (
-                  <div key={i} className="flex items-center gap-3 text-xs font-medium text-zinc-800">
-                    <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-zinc-950 text-white text-[9px]">
-                      ✓
-                    </span>
-                    <span>{b}</span>
+                  <StaggerContainer staggerChildren={0.08} key={`bullets-${activeTab}`} className="mt-6 space-y-3">
+                    {features[activeTab].bullets.map((b, i) => (
+                      <StaggerItem key={i} variant="up" className="flex items-center gap-3 text-xs font-medium text-zinc-800">
+                        <span className="flex size-4.5 shrink-0 items-center justify-center rounded-full bg-zinc-950 text-white text-[10px] font-bold">
+                          <Check className="size-3 stroke-[2.5]" />
+                        </span>
+                        <span>{b}</span>
+                      </StaggerItem>
+                    ))}
+                  </StaggerContainer>
+
+                  <div className="mt-8">
+                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="inline-block">
+                      <Link
+                        href="/login"
+                        className="inline-flex items-center gap-2 rounded-xl bg-zinc-950 px-6 py-3 text-xs font-semibold text-white shadow-xs transition hover:bg-zinc-800"
+                      >
+                        Testar no Sistema <ArrowRight className="size-3.5" />
+                      </Link>
+                    </motion.div>
                   </div>
-                ))}
-              </div>
-
-              <div className="mt-8">
-                <Link
-                  href="/login"
-                  className="inline-flex items-center gap-2 rounded-xl bg-zinc-950 px-6 py-3 text-xs font-semibold text-white transition hover:bg-zinc-800"
-                >
-                  Testar no Sistema <ArrowRight className="size-3.5" />
-                </Link>
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 lg:col-span-5 shadow-xs">
-              <div className="flex items-center gap-3 border-b border-zinc-100 pb-4">
-                <div className="flex size-9 items-center justify-center rounded-xl bg-zinc-950 text-white shadow-xs">
-                  <CalendarDays className="size-4.5 stroke-[2.2]" />
                 </div>
-                <div>
-                  <h4 className="text-xs font-bold text-zinc-950">Visualização de Módulo</h4>
-                  <p className="text-[11px] text-zinc-400">{features[activeTab].title}</p>
-                </div>
-              </div>
 
-              <div className="mt-4 space-y-2 text-xs">
-                <div className="rounded-lg bg-zinc-50 p-4 border border-zinc-100 text-zinc-700">
-                  <span className="font-semibold text-zinc-950 block mb-1.5">Destaques da Funcionalidade:</span>
-                  <ul className="list-disc list-inside space-y-1.5 text-[11px] text-zinc-600">
-                    <li>Integrado ao banco de dados PostgreSQL</li>
-                    <li>Atualização instantânea no painel</li>
-                    <li>Histórico mantido com segurança</li>
-                  </ul>
+                <div className="rounded-xl border border-zinc-200 bg-white p-6 lg:col-span-5 shadow-xs">
+                  <div className="flex items-center gap-3 border-b border-zinc-100 pb-4">
+                    <div className="flex size-9 items-center justify-center rounded-xl bg-zinc-950 text-white shadow-xs">
+                      <CalendarDays className="size-4.5 stroke-[2.2]" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-zinc-950">Visualização de Módulo</h4>
+                      <p className="text-[11px] text-zinc-400">{features[activeTab].title}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 space-y-2 text-xs">
+                    <div className="rounded-lg bg-zinc-50 p-4 border border-zinc-100 text-zinc-700">
+                      <span className="font-semibold text-zinc-950 block mb-1.5">Destaques da Funcionalidade:</span>
+                      <ul className="list-disc list-inside space-y-1.5 text-[11px] text-zinc-600">
+                        <li>Integrado ao banco de dados PostgreSQL</li>
+                        <li>Atualização instantânea no painel</li>
+                        <li>Histórico mantido com segurança</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </section>
   );
 }
+
