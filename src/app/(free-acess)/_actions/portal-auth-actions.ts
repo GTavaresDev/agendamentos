@@ -13,7 +13,7 @@ import {
   ResetClientPassword,
   SetClientPassword,
 } from "@core/application/portal/client-account.usecase";
-import { sendPasswordResetEmail } from "@core/infra/email/resend-email-sender";
+import { sendPasswordResetEmail } from "@core/infra/email/gmail-email-sender";
 import { PrismaClientOAuthAccountRepository } from "@core/infra/persistence/prisma/repositories/prisma-client-oauth-account.repository";
 import { PrismaClientPasswordResetTokenRepository } from "@core/infra/persistence/prisma/repositories/prisma-client-password-reset-token.repository";
 import { PrismaClientRepository } from "@core/infra/persistence/prisma/repositories/prisma-client.repository";
