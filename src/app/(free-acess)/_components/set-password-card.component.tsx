@@ -6,7 +6,7 @@ import { Button } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/butto
 import { FieldLabel } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/field-label.component";
 import { Input } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/input.component";
 import { setClientPasswordAction } from "../_actions/portal-auth-actions";
-import { dismissPasswordNudge } from "./password-nudge";
+import { dismissPasswordNudge } from "./password-nudge/password-nudge";
 
 /**
  * Convite flutuante para quem ainda não tem senha (entrou pelo Google ou foi

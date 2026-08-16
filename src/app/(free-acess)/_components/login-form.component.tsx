@@ -7,7 +7,7 @@ import { Button } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/butto
 import { FieldLabel } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/field-label.component";
 import { Input } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/input.component";
 import { loginClientAction } from "../_actions/portal-auth-actions";
-import { resetPasswordNudge } from "./password-nudge";
+import { resetPasswordNudge } from "./password-nudge/password-nudge";
 
 export function LoginForm() {
   const router = useRouter();

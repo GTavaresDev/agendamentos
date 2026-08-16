@@ -7,7 +7,7 @@ import { getClientAppointmentsAction } from "../../_actions/portal-appointment-a
 import { getClientAccountStatusAction } from "../../_actions/portal-auth-actions";
 import { getClientProfileStatusAction } from "../../_actions/portal-profile-actions";
 import { CompleteProfileForm } from "../../_components/complete-profile-form.component";
-import { PASSWORD_NUDGE_COOKIE } from "../../_components/password-nudge";
+import { PASSWORD_NUDGE_COOKIE } from "../../_components/password-nudge/password-nudge";
 import { SetPasswordCard } from "../../_components/set-password-card.component";
 import {
   clientStatusLabel,
@@ -15,7 +15,7 @@ import {
   formatDate,
   formatFriendlyDate,
   getStatusBadgeVariant,
-} from "../../_components/portal-format";
+} from "../../_components/portal-format/portal-format";
 import { PortalShell, requirePortalSession } from "../../_components/portal-shell.component";
 
 export default async function ClientHomePage() {

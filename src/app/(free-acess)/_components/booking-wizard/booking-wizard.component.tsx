@@ -13,7 +13,7 @@ import {
   formatMonthShort,
   formatShortWeekday,
   isToday,
-} from "../portal-format";
+} from "../portal-format/portal-format";
 import { STEP_ORDER, STEP_TITLE, type BookingWizardProps } from "./booking-wizard.types";
 import { useBookingWizard } from "./use-booking-wizard";
 

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { AuthShell } from "../_components/auth-shell.component";
 import { GoogleSignIn } from "../_components/google-sign-in.component";
 import { LoginForm } from "../_components/login-form.component";
-import { portalOAuthErrorMessage } from "../_components/portal-oauth-error";
+import { portalOAuthErrorMessage } from "../_components/portal-oauth-error/portal-oauth-error";
 
 export const metadata: Metadata = {
   title: "Entrar",

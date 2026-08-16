@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ChevronRight, Clock, UserRound } from "lucide-react";
 import type { ClientAppointmentDTO } from "@core/application/portal/client-appointments.usecase";
 import { Badge } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/badge.component";
-import { clientStatusLabel, formatDayMonth, getStatusBadgeVariant } from "./portal-format";
+import { clientStatusLabel, formatDayMonth, getStatusBadgeVariant } from "./portal-format/portal-format";
 
 /** Cartão do agendamento na visão do cliente: sem preço, sem notas, sem ids. */
 export function AppointmentCard({ appointment }: { appointment: ClientAppointmentDTO }) {

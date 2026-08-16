@@ -36,7 +36,7 @@ export async function requireCompletePortalSession(): Promise<ClientSession> {
 }
 import { LogoutButton } from "./logout-button.component";
 import { PortalNav } from "./portal-nav.component";
-import { firstName } from "./portal-format";
+import { firstName } from "./portal-format/portal-format";
 
 /**
  * Casca do portal do cliente: cabeçalho próprio, sem a sidebar do sistema

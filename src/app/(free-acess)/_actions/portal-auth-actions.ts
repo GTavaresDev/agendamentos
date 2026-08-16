@@ -21,7 +21,7 @@ import {
   type ClientSession,
 } from "@/lib/client-session";
 import { PORTAL_HOME_PATH, signIn as portalSignIn } from "@/portal-auth";
-import { PASSWORD_NUDGE_COOKIE } from "../_components/password-nudge";
+import { PASSWORD_NUDGE_COOKIE } from "../_components/password-nudge/password-nudge";
 
 const clientRepository = new PrismaClientRepository();
 const oauthAccountRepository = new PrismaClientOAuthAccountRepository();

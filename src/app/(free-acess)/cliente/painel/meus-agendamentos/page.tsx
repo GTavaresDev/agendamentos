@@ -9,7 +9,7 @@ import {
   clientStatusLabel,
   formatDate,
   getStatusBadgeVariant,
-} from "../../../_components/portal-format";
+} from "../../../_components/portal-format/portal-format";
 import { PortalShell, requireCompletePortalSession } from "../../../_components/portal-shell.component";
 
 export const metadata: Metadata = {
