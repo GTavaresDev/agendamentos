@@ -219,9 +219,14 @@ export function SectionHead({
   align?: "left" | "right" | "center";
 }) {
   return (
-    <CardHeader className="p-3.5 sm:p-6 flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4">
-      <div>
-        <div className="flex items-center gap-1.5">
+    <CardHeader className="p-3.5 sm:p-6 flex flex-col sm:flex-row sm:flex-wrap sm:items-start justify-between gap-2 sm:gap-4">
+      {/* min-w-0: sem isso o bloco de texto não encolhe (min-width:auto do flex)
+          e empurra a ação para fora do card — era o corte do badge nas colunas
+          estreitas do grid. basis-48 + flex-wrap: quando não sobra espaço para
+          o título e a ação lado a lado, a ação desce para a própria linha em
+          vez de espremer o título. */}
+      <div className="min-w-0 flex-1 sm:basis-48">
+        <div className="flex items-start gap-1.5">
           <CardTitle className="text-base sm:text-lg">{title}</CardTitle>
           {info && <CardInfoModal info={info} align={align} />}
         </div>

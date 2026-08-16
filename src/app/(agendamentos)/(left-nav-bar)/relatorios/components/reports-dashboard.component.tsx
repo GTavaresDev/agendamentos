@@ -14,17 +14,68 @@ import {
   ReportWeeklyAndChannels,
 } from "./report-tables.component";
 
+/** Mesma validade do cache do servidor: 20 min. */
+const RELATORIO_VALIDO_MS = 1_200_000;
+
+/**
+ * Retenção do relatório já carregado, em memória, por aba.
+ *
+ * As outras rotas parecem instantâneas ao voltar porque os providers do layout
+ * seguram a lista em memória. /relatorios não tem provider — remonta do zero a
+ * cada navegação e refazia a busca inteira. Este Map faz o mesmo papel sem
+ * empurrar um provider para o layout (o que faria TODA página pagar pelo
+ * relatório, que é a consulta mais cara do sistema).
+ *
+ * É memória do processo, não banco no navegador: some no refresh e some ao
+ * fechar a aba. O Postgres continua sendo a fonte da verdade.
+ */
+const relatorioEmMemoria = new Map<string, { em: number; dados: ReportMetrics }>();
+
+function lerDaMemoria(period: string): ReportMetrics | null {
+  const guardado = relatorioEmMemoria.get(period);
+  if (!guardado || Date.now() - guardado.em > RELATORIO_VALIDO_MS) {
+    return null;
+  }
+  return guardado.dados;
+}
+
 export function ReportsDashboard() {
   const [period, setPeriod] = useState("Últimos 6 meses");
-  const [loading, setLoading] = useState(true);
-  const [dbMetrics, setDbMetrics] = useState<ReportMetrics | null>(null);
+  // Já carregado nesta aba: entra com o dado em mãos, sem skeleton.
+  const [dbMetrics, setDbMetrics] = useState<ReportMetrics | null>(() =>
+    lerDaMemoria("Últimos 6 meses"),
+  );
+  const [loading, setLoading] = useState(() => lerDaMemoria("Últimos 6 meses") === null);
 
   useEffect(() => {
-    setLoading(true);
-    fetchReportMetricsAction(period).then((data) => {
-      if (data) setDbMetrics(data);
+    const guardado = lerDaMemoria(period);
+    if (guardado) {
+      setDbMetrics(guardado);
       setLoading(false);
-    });
+      return;
+    }
+
+    let cancelado = false;
+    setLoading(true);
+
+    fetchReportMetricsAction(period)
+      .then((data) => {
+        if (cancelado) return;
+        if (data) {
+          relatorioEmMemoria.set(period, { em: Date.now(), dados: data });
+          setDbMetrics(data);
+        }
+      })
+      // Sem isto, uma ação que falha (sem permissão, rede fora) deixa o
+      // skeleton girando para sempre.
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelado) setLoading(false);
+      });
+
+    return () => {
+      cancelado = true;
+    };
   }, [period]);
 
   if (loading && !dbMetrics) {

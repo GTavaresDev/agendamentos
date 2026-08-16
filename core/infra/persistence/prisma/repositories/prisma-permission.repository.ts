@@ -1,9 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../client';
 import { IPermissionRepository } from '@core/domain/users/permission.repository';
 import { UserPermission, UserPermissionProps } from '@core/domain/users/user-permission.entity';
 import { SystemPermission, SystemPermissionProps } from '@core/domain/users/system-permission.entity';
-
-const prisma = new PrismaClient();
+import { CacheKeys, invalidate } from '../../../cache';
 
 export class PrismaPermissionRepository implements IPermissionRepository {
   async findUserPermissions(userId: string): Promise<UserPermission[]> {
@@ -31,6 +30,8 @@ export class PrismaPermissionRepository implements IPermissionRepository {
         isSystemPermission: false,
       },
     });
+    // `users:all` carrega as permissões habilitadas de cada usuário.
+    await invalidate(CacheKeys.users);
     return new UserPermission(perm as UserPermissionProps);
   }
 
@@ -39,6 +40,7 @@ export class PrismaPermissionRepository implements IPermissionRepository {
       where: { userId, name: permissionName },
       data: { enabled: false, updatedAt: new Date() },
     });
+    await invalidate(CacheKeys.users);
   }
 
   async hasPermission(userId: string, permissionName: string): Promise<boolean> {

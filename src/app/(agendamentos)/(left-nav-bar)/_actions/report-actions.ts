@@ -8,6 +8,8 @@ import { PrismaServiceRepository } from "@core/infra/persistence/prisma/reposito
 import { GetDashboardMetrics, DashboardMetrics } from "@core/application/reports/get-dashboard-metrics.usecase";
 import { GetReportMetrics, ReportMetrics } from "@core/application/reports/get-report-metrics.usecase";
 import { requireSessionAction } from "@/app/(agendamentos)/(left-nav-bar)/_actions/auth-actions";
+import { CacheKeys, CacheTTL, getCached } from "@core/infra/cache";
+import { canAccessReports } from "@/lib/permissions";
 
 import { PrismaSaleRepository } from "@core/infra/persistence/prisma/repositories/prisma-sale.repository";
 
@@ -23,8 +25,23 @@ export async function fetchDashboardMetricsAction(): Promise<DashboardMetrics> {
   return await useCase.execute();
 }
 
+/**
+ * Métricas do período. É o caminho mais caro do sistema — quatro tabelas
+ * inteiras somadas em memória (~800 ms no Neon) — e é puramente informativo,
+ * então tolera a defasagem do TTL de 20 min.
+ *
+ * A permissão é conferida AQUI, e não só na página: a página apenas redireciona
+ * quem não pode ver, mas a Server Action é chamável direto, e ela devolve
+ * faturamento e dados de clientes. A verificação vem antes do cache — o Redis
+ * nunca é um caminho alternativo para escapar da autorização.
+ */
 export async function fetchReportMetricsAction(period?: string): Promise<ReportMetrics> {
-  await requireSessionAction();
-  const useCase = new GetReportMetrics(appointmentRepo, userRepo, serviceRepo, saleRepo);
-  return await useCase.execute(period);
+  const session = await requireSessionAction();
+  if (!canAccessReports(session)) {
+    throw new Error("Você não tem permissão para ver relatórios.");
+  }
+
+  return getCached(CacheKeys.reports(period ?? "padrao"), CacheTTL.reports, () =>
+    new GetReportMetrics(appointmentRepo, userRepo, serviceRepo, saleRepo).execute(period),
+  );
 }

@@ -20,6 +20,7 @@ import {
   requireClientSession,
   type ClientSession,
 } from "@/lib/client-session";
+import { portalClientRepository } from "@/lib/portal-client-repository";
 import { PORTAL_HOME_PATH, signIn as portalSignIn } from "@/portal-auth";
 import { PASSWORD_NUDGE_COOKIE } from "../_components/password-nudge/password-nudge";
 
@@ -123,7 +124,7 @@ export async function getClientAccountStatusAction(): Promise<{
   hasPassword: boolean;
 }> {
   const session = await requireClientSession();
-  const client = await clientRepository.findById(session.clientId);
+  const client = await portalClientRepository.findById(session.clientId);
   return { hasPassword: Boolean(client?.password) };
 }
 

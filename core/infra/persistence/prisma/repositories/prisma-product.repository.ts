@@ -2,13 +2,16 @@ import { prisma } from "../client";
 import { Product } from "@core/domain/products/product.entity";
 import { ProductRepository } from "@core/domain/products/product.repository";
 import { ProductMapper } from "../mappers/product.mapper";
+import { CacheKeys, CacheTTL, getCached, invalidate } from "../../../cache";
 
 export class PrismaProductRepository implements ProductRepository {
   async findAll(): Promise<Product[]> {
     try {
-      const records = await prisma.product.findMany({
-        orderBy: { createdAt: "desc" },
-      });
+      const records = await getCached(CacheKeys.products, CacheTTL.products, () =>
+        prisma.product.findMany({
+          orderBy: { createdAt: "desc" },
+        }),
+      );
       return records.map(ProductMapper.toDomain);
     } catch (error) {
       console.error("[PrismaProductRepository.findAll] Database query failed:", error);
@@ -38,6 +41,7 @@ export class PrismaProductRepository implements ProductRepository {
         status: raw.status,
       },
     });
+    await invalidate(CacheKeys.products);
     return ProductMapper.toDomain(created);
   }
 
@@ -53,10 +57,12 @@ export class PrismaProductRepository implements ProductRepository {
         status: raw.status,
       },
     });
+    await invalidate(CacheKeys.products);
     return ProductMapper.toDomain(updated);
   }
 
   async delete(id: string): Promise<void> {
     await prisma.product.delete({ where: { id } });
+    await invalidate(CacheKeys.products);
   }
 }

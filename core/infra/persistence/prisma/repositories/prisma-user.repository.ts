@@ -2,13 +2,20 @@ import { prisma } from "../client";
 import { User } from "@core/domain/users/user.entity";
 import { UserRepository } from "@core/domain/users/user.repository";
 import { UserMapper } from "../mappers/user.mapper";
+import { CacheKeys, CacheTTL, getCached, invalidate } from "../../../cache";
 
 export class PrismaUserRepository implements UserRepository {
   async findAll(): Promise<User[]> {
     try {
-      const records = await prisma.user.findMany({
-        include: { permissions: { where: { enabled: true } } },
-        orderBy: { createdAt: "desc" },
+      const records = await getCached(CacheKeys.users, CacheTTL.users, async () => {
+        // O hash de senha nunca entra no Redis. Quem autentica é findByEmail,
+        // que não passa por cache — findAll só alimenta listagens.
+        const rows = await prisma.user.findMany({
+          omit: { password: true },
+          include: { permissions: { where: { enabled: true } } },
+          orderBy: { createdAt: "desc" },
+        });
+        return rows.map((row) => ({ ...row, password: null }));
       });
       return records.map(UserMapper.toDomain);
     } catch (error) {
@@ -65,6 +72,7 @@ export class PrismaUserRepository implements UserRepository {
       },
       include: { permissions: { where: { enabled: true } } },
     });
+    await invalidate(CacheKeys.users);
     return UserMapper.toDomain(created);
   }
 
@@ -86,10 +94,12 @@ export class PrismaUserRepository implements UserRepository {
       },
       include: { permissions: { where: { enabled: true } } },
     });
+    await invalidate(CacheKeys.users);
     return UserMapper.toDomain(updated);
   }
 
   async delete(id: string): Promise<void> {
     await prisma.user.delete({ where: { id } });
+    await invalidate(CacheKeys.users);
   }
 }

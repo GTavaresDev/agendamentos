@@ -2,6 +2,7 @@ import { prisma } from "../client";
 import { Client } from "../../../../domain/clients/client.entity";
 import { ClientRepository } from "../../../../domain/clients/client.repository";
 import { ClientMapper } from "../mappers/client.mapper";
+import { CacheKeys, CacheTTL, getCached, invalidate } from "../../../cache";
 
 export class PrismaClientRepository implements ClientRepository {
   async save(client: Client): Promise<void> {
@@ -9,6 +10,7 @@ export class PrismaClientRepository implements ClientRepository {
     await prisma.client.create({
       data: raw,
     });
+    await invalidate(CacheKeys.clients);
   }
 
   async findById(id: string): Promise<Client | null> {
@@ -37,9 +39,11 @@ export class PrismaClientRepository implements ClientRepository {
 
   async findAll(): Promise<Client[]> {
     try {
-      const list = await prisma.client.findMany({
-        orderBy: { name: "asc" },
-      });
+      const list = await getCached(CacheKeys.clients, CacheTTL.clients, () =>
+        prisma.client.findMany({
+          orderBy: { name: "asc" },
+        }),
+      );
       return list.map(ClientMapper.toDomain);
     } catch (error) {
       console.error("[PrismaClientRepository.findAll] Database query failed:", error);
@@ -63,11 +67,13 @@ export class PrismaClientRepository implements ClientRepository {
         updatedAt: raw.updatedAt,
       },
     });
+    await invalidate(CacheKeys.clients);
   }
 
   async delete(id: string): Promise<void> {
     await prisma.client.delete({
       where: { id },
     });
+    await invalidate(CacheKeys.clients);
   }
 }

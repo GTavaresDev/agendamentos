@@ -2,6 +2,7 @@ import { prisma } from "../client";
 import { Sale } from "@core/domain/sales/sale.entity";
 import { SaleRepository } from "@core/domain/sales/sale.repository";
 import { SaleMapper } from "../mappers/sale.mapper";
+import { CacheKeys, invalidate } from "../../../cache";
 
 export class PrismaSaleRepository implements SaleRepository {
   async findAll(): Promise<Sale[]> {
@@ -75,7 +76,7 @@ export class PrismaSaleRepository implements SaleRepository {
   }
 
   async saveWithInventoryUpdate(sale: Sale, quantityDelta: number): Promise<Sale> {
-    return await prisma.$transaction(async (tx) => {
+    const created = await prisma.$transaction(async (tx) => {
       const product = await tx.product.findUnique({
         where: { id: sale.productId },
       });
@@ -109,6 +110,10 @@ export class PrismaSaleRepository implements SaleRepository {
 
       return SaleMapper.toDomain(created);
     });
+
+    // O estoque mudou junto com a venda.
+    await invalidate(CacheKeys.products);
+    return created;
   }
 
   async updateWithInventoryRecalculation(
@@ -116,7 +121,7 @@ export class PrismaSaleRepository implements SaleRepository {
     sale: Sale,
     oldQuantity: number,
   ): Promise<Sale> {
-    return await prisma.$transaction(async (tx) => {
+    const updated = await prisma.$transaction(async (tx) => {
       const product = await tx.product.findUnique({
         where: { id: sale.productId },
       });
@@ -151,6 +156,9 @@ export class PrismaSaleRepository implements SaleRepository {
 
       return SaleMapper.toDomain(updated);
     });
+
+    await invalidate(CacheKeys.products);
+    return updated;
   }
 
   async deleteWithInventoryRestore(id: string): Promise<void> {
@@ -176,5 +184,7 @@ export class PrismaSaleRepository implements SaleRepository {
 
       await tx.sale.delete({ where: { id } });
     });
+
+    await invalidate(CacheKeys.products);
   }
 }

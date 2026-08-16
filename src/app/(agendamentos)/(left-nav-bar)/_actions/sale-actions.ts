@@ -22,19 +22,17 @@ export async function fetchSalesAction(filter?: {
   const useCase = new ListSales(saleRepository);
   const sales = await useCase.execute(filter);
 
-  const salesWithProducts = await Promise.all(
-    sales.map(async (sale) => {
-      const product = await prisma.product.findUnique({
-        where: { id: sale.productId },
-      });
-      return {
-        ...sale.toJSON(),
-        productName: product?.name,
-      };
-    }),
-  );
+  // Uma consulta para todos os produtos citados, não uma por venda.
+  const products = await prisma.product.findMany({
+    where: { id: { in: [...new Set(sales.map((sale) => sale.productId))] } },
+    select: { id: true, name: true },
+  });
+  const nameByProductId = new Map(products.map((p) => [p.id, p.name]));
 
-  return salesWithProducts;
+  return sales.map((sale) => ({
+    ...sale.toJSON(),
+    productName: nameByProductId.get(sale.productId),
+  }));
 }
 
 export async function createSaleAction(input: {

@@ -84,6 +84,12 @@ export interface ReportMetrics {
   peakHour: string;
 }
 
+/** Rótulos do eixo X do gráfico de evolução, indexados por mês (0 = janeiro). */
+const MONTH_LABELS = [
+  "JAN", "FEV", "MAR", "ABR", "MAI", "JUN",
+  "JUL", "AGO", "SET", "OUT", "NOV", "DEZ",
+];
+
 const WORK_HOURS = ["08", "09", "10", "11", "13", "14", "15", "16", "17"];
 const WORK_DAYS = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const TIME_SLOTS = ["08–09", "09–10", "10–11", "13–14", "14–15", "15–16", "16–18"];
@@ -190,10 +196,14 @@ export class GetReportMetrics {
     const occupancyNum = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
     // Monthly evolution data
+    // A chave é "AAAA-MM" porque ela precisa ORDENAR. Rótulo em pt-BR ("mai. de
+    // 2026") não ordena: `new Date()` não lê esse formato, devolve Invalid Date
+    // e o comparador vira NaN — o gráfico saía fora de ordem (MAI, AGO, JUN).
     const monthlyMap = new Map<string, { agendamentos: number; cancelados: number; receita: number }>();
     for (const appt of filteredAppointments) {
-      const date = new Date(appt.date);
-      const monthKey = date.toLocaleDateString("pt-BR", { month: "short", year: "numeric" });
+      // appt.date já é "AAAA-MM-DD": fatiar evita o fuso do `new Date`, que em
+      // UTC-3 jogava o dia 1º para o mês anterior.
+      const monthKey = appt.date.slice(0, 7);
       const existing = monthlyMap.get(monthKey) || { agendamentos: 0, cancelados: 0, receita: 0 };
       existing.agendamentos += 1;
       if (appt.status === "Cancelado") existing.cancelados += 1;
@@ -204,14 +214,17 @@ export class GetReportMetrics {
     }
     for (const sale of filteredSales) {
       const date = sale.createdAt ? new Date(sale.createdAt) : new Date();
-      const monthKey = date.toLocaleDateString("pt-BR", { month: "short", year: "numeric" });
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
       const existing = monthlyMap.get(monthKey) || { agendamentos: 0, cancelados: 0, receita: 0 };
       existing.receita += sale.totalPrice || 0;
       monthlyMap.set(monthKey, existing);
     }
     const monthlyData = Array.from(monthlyMap.entries())
-      .sort(([aKey], [bKey]) => new Date(aKey).getTime() - new Date(bKey).getTime())
-      .map(([month, data]) => ({ month: month.substring(0, 3).toUpperCase(), ...data }));
+      .sort(([aKey], [bKey]) => aKey.localeCompare(bKey))
+      .map(([monthKey, data]) => ({
+        month: MONTH_LABELS[Number(monthKey.slice(5, 7)) - 1],
+        ...data,
+      }));
 
     // Status distribution
     const statusData = [

@@ -2,6 +2,10 @@ import { prisma } from "../client";
 import { Service } from "../../../../domain/services/service.entity";
 import { ServiceRepository } from "../../../../domain/services/service.repository";
 import { ServiceMapper } from "../mappers/service.mapper";
+import { CacheKeys, CacheTTL, getCached, invalidate } from "../../../cache";
+
+/** Toda escrita derruba as duas listas: `findActive` é um recorte de `findAll`. */
+const SERVICE_KEYS = [CacheKeys.services, CacheKeys.servicesActive];
 
 export class PrismaServiceRepository implements ServiceRepository {
   async save(service: Service): Promise<void> {
@@ -9,6 +13,7 @@ export class PrismaServiceRepository implements ServiceRepository {
     await prisma.service.create({
       data: raw,
     });
+    await invalidate(...SERVICE_KEYS);
   }
 
   async findById(id: string): Promise<Service | null> {
@@ -37,9 +42,11 @@ export class PrismaServiceRepository implements ServiceRepository {
 
   async findAll(): Promise<Service[]> {
     try {
-      const list = await prisma.service.findMany({
-        orderBy: { name: "asc" },
-      });
+      const list = await getCached(CacheKeys.services, CacheTTL.services, () =>
+        prisma.service.findMany({
+          orderBy: { name: "asc" },
+        }),
+      );
       return list.map(ServiceMapper.toDomain);
     } catch (error) {
       console.error("[PrismaServiceRepository.findAll] Database query failed:", error);
@@ -49,10 +56,12 @@ export class PrismaServiceRepository implements ServiceRepository {
 
   async findActive(): Promise<Service[]> {
     try {
-      const list = await prisma.service.findMany({
-        where: { status: "Ativo" },
-        orderBy: { name: "asc" },
-      });
+      const list = await getCached(CacheKeys.servicesActive, CacheTTL.services, () =>
+        prisma.service.findMany({
+          where: { status: "Ativo" },
+          orderBy: { name: "asc" },
+        }),
+      );
       return list.map(ServiceMapper.toDomain);
     } catch (error) {
       console.error("[PrismaServiceRepository.findActive] Database query failed:", error);
@@ -74,11 +83,13 @@ export class PrismaServiceRepository implements ServiceRepository {
         updatedAt: raw.updatedAt,
       },
     });
+    await invalidate(...SERVICE_KEYS);
   }
 
   async delete(id: string): Promise<void> {
     await prisma.service.delete({
       where: { id },
     });
+    await invalidate(...SERVICE_KEYS);
   }
 }

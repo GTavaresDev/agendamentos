@@ -10,6 +10,7 @@ import {
 import { PrismaClientRepository } from "@core/infra/persistence/prisma/repositories/prisma-client.repository";
 import { formatActionError } from "@/lib/action-error-handler";
 import { requireClientSession } from "@/lib/client-session";
+import { portalClientRepository } from "@/lib/portal-client-repository";
 import type { PortalActionResult } from "./portal-auth-actions";
 
 const clientRepository = new PrismaClientRepository();
@@ -17,7 +18,7 @@ const clientRepository = new PrismaClientRepository();
 /** Estado do cadastro do cliente autenticado. Só dados dele mesmo. */
 export async function getClientProfileStatusAction(): Promise<ClientProfileStatusDTO> {
   const session = await requireClientSession();
-  return new GetClientProfileStatus(clientRepository).execute(session.clientId);
+  return new GetClientProfileStatus(portalClientRepository).execute(session.clientId);
 }
 
 const profileSchema = z.object({

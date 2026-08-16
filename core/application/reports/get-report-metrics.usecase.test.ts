@@ -121,4 +121,42 @@ describe("GetReportMetrics", () => {
     expect(result.productsRevenueNum).toBe(0);
     expect(result.salesCount).toBe(0);
   });
+
+  it("ordena a evolução mensal cronologicamente, mesmo com os dados fora de ordem", async () => {
+    const appointmentRepo = mockAppointmentRepository();
+    const userRepo = mockUserRepository();
+    const serviceRepo = mockServiceRepository();
+    // De propósito fora de ordem: era assim que o gráfico saía MAI, AGO, JUN.
+    appointmentRepo.findAll.mockResolvedValue([
+      buildAppointment({ id: "a1", date: "2026-08-05", status: "Confirmado" }),
+      buildAppointment({ id: "a2", date: "2026-05-10", status: "Confirmado" }),
+      buildAppointment({ id: "a3", date: "2026-07-10", status: "Confirmado" }),
+      buildAppointment({ id: "a4", date: "2026-06-10", status: "Confirmado" }),
+    ]);
+    userRepo.findAll.mockResolvedValue([]);
+    serviceRepo.findAll.mockResolvedValue([]);
+    const useCase = new GetReportMetrics(appointmentRepo, userRepo, serviceRepo);
+
+    const result = await useCase.execute();
+
+    expect(result.monthlyData.map((m) => m.month)).toEqual(["MAI", "JUN", "JUL", "AGO"]);
+  });
+
+  it("o dia 1º conta no seu próprio mês (sem escorregar pelo fuso)", async () => {
+    const appointmentRepo = mockAppointmentRepository();
+    const userRepo = mockUserRepository();
+    const serviceRepo = mockServiceRepository();
+    appointmentRepo.findAll.mockResolvedValue([
+      buildAppointment({ id: "a1", date: "2026-08-01", status: "Confirmado" }),
+    ]);
+    userRepo.findAll.mockResolvedValue([]);
+    serviceRepo.findAll.mockResolvedValue([]);
+    const useCase = new GetReportMetrics(appointmentRepo, userRepo, serviceRepo);
+
+    const result = await useCase.execute();
+
+    expect(result.monthlyData).toEqual([
+      { month: "AGO", agendamentos: 1, cancelados: 0, receita: 0 },
+    ]);
+  });
 });
