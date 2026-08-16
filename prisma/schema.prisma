@@ -85,6 +85,7 @@ model Client {
   updatedAt    DateTime      @updatedAt
   appointments Appointment[]
   oauthAccounts ClientOAuthAccount[]
+  passwordResetTokens ClientPasswordResetToken[]
 
   @@map("Clients")
 }
@@ -102,6 +103,21 @@ model ClientOAuthAccount {
   @@unique([provider, providerAccountId])
   @@index([clientId])
   @@map("ClientOAuthAccounts")
+}
+
+/// Token de redefinição de senha do portal. Guarda o hash (sha256), não o
+/// token puro — se o banco vazar, o token não é reutilizável direto.
+model ClientPasswordResetToken {
+  id        String    @id @default(uuid())
+  clientId  String
+  client    Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([clientId])
+  @@map("ClientPasswordResetTokens")
 }
 
 model Service {
