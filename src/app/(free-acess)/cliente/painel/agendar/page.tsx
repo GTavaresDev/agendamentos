@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getBookableServicesAction } from "../../../_actions/portal-booking-actions";
 import { BookingWizard } from "../../../_components/booking-wizard";
-import { PortalShell, requireCompletePortalSession } from "../../../_components/portal-shell";
+import { PortalShell, requireCompletePortalSession } from "../../../_components/portal-shell.component";
 
 export const metadata: Metadata = {
   title: "Agendar",

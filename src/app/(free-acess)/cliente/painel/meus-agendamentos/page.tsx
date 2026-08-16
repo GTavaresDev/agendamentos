@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CalendarPlus, ChevronRight } from "lucide-react";
-import { Badge } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/badge";
-import { Button } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/button";
+import { Badge } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/badge.component";
+import { Button } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/button.component";
 import { getClientAppointmentsAction } from "../../../_actions/portal-appointment-actions";
-import { AppointmentCard } from "../../../_components/appointment-card";
+import { AppointmentCard } from "../../../_components/appointment-card.component";
 import {
   clientStatusLabel,
   formatDate,
   getStatusBadgeVariant,
 } from "../../../_components/portal-format";
-import { PortalShell, requireCompletePortalSession } from "../../../_components/portal-shell";
+import { PortalShell, requireCompletePortalSession } from "../../../_components/portal-shell.component";
 
 export const metadata: Metadata = {
   title: "Meus agendamentos",

@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { CalendarPlus, ChevronRight, Clock, ListChecks, UserRound } from "lucide-react";
-import { Badge } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/badge";
-import { Button } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/button";
+import { Badge } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/badge.component";
+import { Button } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/button.component";
 import { getClientAppointmentsAction } from "../../_actions/portal-appointment-actions";
 import { getClientAccountStatusAction } from "../../_actions/portal-auth-actions";
 import { getClientProfileStatusAction } from "../../_actions/portal-profile-actions";
-import { CompleteProfileForm } from "../../_components/complete-profile-form";
+import { CompleteProfileForm } from "../../_components/complete-profile-form.component";
 import { PASSWORD_NUDGE_COOKIE } from "../../_components/password-nudge";
-import { SetPasswordCard } from "../../_components/set-password-card";
+import { SetPasswordCard } from "../../_components/set-password-card.component";
 import {
   clientStatusLabel,
   firstName,
@@ -16,7 +16,7 @@ import {
   formatFriendlyDate,
   getStatusBadgeVariant,
 } from "../../_components/portal-format";
-import { PortalShell, requirePortalSession } from "../../_components/portal-shell";
+import { PortalShell, requirePortalSession } from "../../_components/portal-shell.component";
 
 export default async function ClientHomePage() {
   const session = await requirePortalSession();

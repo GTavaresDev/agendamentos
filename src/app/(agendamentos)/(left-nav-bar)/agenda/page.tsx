@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { AgendaPage } from "@/app/(agendamentos)/(left-nav-bar)/agenda/components/agenda-page";
+import { AgendaPage } from "@/app/(agendamentos)/(left-nav-bar)/agenda/components/agenda-page.component";
 
 export default async function Page() {
   const session = await auth();

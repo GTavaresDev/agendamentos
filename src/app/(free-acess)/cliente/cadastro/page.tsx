@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AuthShell } from "../../_components/auth-shell";
-import { GoogleSignIn } from "../../_components/google-sign-in";
-import { RegisterForm } from "../../_components/register-form";
+import { AuthShell } from "../../_components/auth-shell.component";
+import { GoogleSignIn } from "../../_components/google-sign-in.component";
+import { RegisterForm } from "../../_components/register-form.component";
 
 export const metadata: Metadata = {
   title: "Criar conta",

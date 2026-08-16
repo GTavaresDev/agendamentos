@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AuthShell } from "../../_components/auth-shell";
-import { PasswordResetForm } from "../../_components/password-reset-form";
+import { AuthShell } from "../../_components/auth-shell.component";
+import { PasswordResetForm } from "../../_components/password-reset-form.component";
 
 export const metadata: Metadata = {
   title: "Recuperar senha",

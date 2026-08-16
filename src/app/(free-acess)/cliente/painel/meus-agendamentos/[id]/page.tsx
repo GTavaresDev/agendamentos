@@ -2,16 +2,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { Badge } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/badge";
+import { Badge } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/badge.component";
 import { getClientAppointmentAction } from "../../../../_actions/portal-appointment-actions";
-import { CancelAppointmentButton } from "../../../../_components/cancel-appointment-button";
+import { CancelAppointmentButton } from "../../../../_components/cancel-appointment-button.component";
 import {
   clientStatusLabel,
   formatDate,
   formatFriendlyDate,
   getStatusBadgeVariant,
 } from "../../../../_components/portal-format";
-import { PortalShell, requireCompletePortalSession } from "../../../../_components/portal-shell";
+import { PortalShell, requireCompletePortalSession } from "../../../../_components/portal-shell.component";
 
 export const metadata: Metadata = {
   title: "Detalhes do agendamento",

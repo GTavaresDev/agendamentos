@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { ProductsView } from "@/app/(agendamentos)/(left-nav-bar)/produtos/components/products-view";
+import { ProductsView } from "@/app/(agendamentos)/(left-nav-bar)/produtos/components/products-view.component";
 
 export const metadata: Metadata = {
   title: "Produtos — Agendamentos",

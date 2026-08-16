@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { canAccessReports } from "@/lib/permissions";
-import { ReportsDashboard } from "./components/reports-dashboard";
+import { ReportsDashboard } from "./components/reports-dashboard.component";
 
 export const metadata: Metadata = {
   title: "Relatórios — Agendamentos",

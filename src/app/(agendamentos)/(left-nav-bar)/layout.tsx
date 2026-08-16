@@ -1,6 +1,6 @@
 import React from "react";
 import { Providers } from "@/app/(agendamentos)/(left-nav-bar)/_providers/providers";
-import { ShellLayout } from "./_components/shell-layout";
+import { ShellLayout } from "./_components/shell-layout.component";
 
 export default function LeftNavBarLayout({
   children,

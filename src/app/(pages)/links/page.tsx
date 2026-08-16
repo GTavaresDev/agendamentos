@@ -1,7 +1,7 @@
 "use client";
 
-import { LinksHeader } from "./_components/links-header";
-import { LinksList } from "./_components/links-list";
+import { LinksHeader } from "./_components/links-header.component";
+import { LinksList } from "./_components/links-list.component";
 
 export default function ClinicLinksPage() {
   return (

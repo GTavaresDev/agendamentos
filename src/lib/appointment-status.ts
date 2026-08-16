@@ -1,4 +1,4 @@
-import type { BadgeVariant } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/badge";
+import type { BadgeVariant } from "@/app/(agendamentos)/(left-nav-bar)/_components/ui/badge.component";
 
 export type AppointmentStatus = "Confirmado" | "Pendente" | "Concluído" | "Cancelado";
 

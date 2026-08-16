@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { SalesView } from "./components/sales-view";
+import { SalesView } from "./components/sales-view.component";
 
 export const metadata: Metadata = {
   title: "Vendas — Agendamentos",

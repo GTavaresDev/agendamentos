@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AgendamentosLanding } from "@/app/(pages)/site/_components/agendamentos-landing";
+import { AgendamentosLanding } from "@/app/(pages)/site/_components/agendamentos-landing.component";
 
 export const metadata: Metadata = {
   title: "Agendamentos — Sistema Integrado de Gestão & Agendamentos",
