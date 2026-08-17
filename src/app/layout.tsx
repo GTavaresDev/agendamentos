@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://agendamentos.vercel.app";
+const siteUrl = process.env.APP_URL || "https://agendamentos.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

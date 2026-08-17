@@ -15,7 +15,7 @@ function getTransporter() {
   return transporter;
 }
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://agendamentos.vercel.app";
+const APP_URL = process.env.APP_URL || "https://agendamentos.vercel.app";
 
 function passwordResetEmailHtml(resetUrl: string): string {
   return `<!DOCTYPE html>

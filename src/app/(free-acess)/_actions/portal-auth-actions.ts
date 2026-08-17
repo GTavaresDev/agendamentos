@@ -32,7 +32,7 @@ import { PASSWORD_NUDGE_COOKIE } from "../_components/password-nudge/password-nu
 const clientRepository = new PrismaClientRepository();
 const oauthAccountRepository = new PrismaClientOAuthAccountRepository();
 const resetTokenRepository = new PrismaClientPasswordResetTokenRepository();
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://agendamentos.vercel.app";
+const APP_URL = process.env.APP_URL || "https://agendamentos.vercel.app";
 
 export type PortalActionResult = { success: boolean; error?: string };
 
