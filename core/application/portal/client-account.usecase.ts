@@ -216,32 +216,22 @@ export class RequestClientPasswordReset {
   ) {}
 
   async execute(email: string, baseUrl: string): Promise<void> {
-    console.log("[reset-debug] 1. buscando cliente", { email });
     const client = await this.clientRepository.findByEmail(normalizeEmail(email));
-    console.log("[reset-debug] 2. cliente encontrado?", {
-      found: !!client,
-      hasPassword: !!client?.password,
-      status: client?.status,
-    });
     if (!client || !client.password || client.status !== "Ativo") {
-      console.log("[reset-debug] 3. abortando silenciosamente (cliente inválido pro fluxo)");
       return;
     }
 
     const token = crypto.randomBytes(32).toString("hex");
-    console.log("[reset-debug] 4. criando token no banco");
     await this.resetTokenRepository.create({
       clientId: client.id,
       tokenHash: hashResetToken(token),
       expiresAt: new Date(Date.now() + PASSWORD_RESET_TOKEN_TTL_MS),
     });
-    console.log("[reset-debug] 5. token criado, chamando sendEmail", { baseUrl });
 
     await this.sendEmail({
       to: client.email,
       resetUrl: `${baseUrl}/cliente/redefinir-senha?token=${token}`,
     });
-    console.log("[reset-debug] 6. sendEmail concluído sem lançar erro");
   }
 }
 

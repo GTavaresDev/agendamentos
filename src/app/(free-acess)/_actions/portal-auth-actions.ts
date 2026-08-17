@@ -214,10 +214,7 @@ export async function requestClientPasswordResetAction(input: {
       sendPasswordResetEmail,
     ).execute(parsed.data.email, APP_URL);
   } catch (error) {
-    console.error(
-      "[portal] falha ao processar recuperação de senha",
-      error instanceof Error ? { message: error.message, stack: error.stack } : error,
-    );
+    console.error("[portal] falha ao processar recuperação de senha", error);
   }
 
   return { success: true };
