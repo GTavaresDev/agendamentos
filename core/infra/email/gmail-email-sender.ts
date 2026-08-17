@@ -4,6 +4,10 @@ let transporter: ReturnType<typeof nodemailer.createTransport> | null = null;
 
 function getTransporter() {
   if (!transporter) {
+    console.log("[reset-debug] a. criando transporter", {
+      hasUser: !!process.env.GMAIL_USER,
+      hasPassword: !!process.env.GMAIL_APP_PASSWORD,
+    });
     transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -75,10 +79,17 @@ export async function sendPasswordResetEmail(input: {
   to: string;
   resetUrl: string;
 }): Promise<void> {
-  await getTransporter().sendMail({
-    from: `Agendamentos <${process.env.GMAIL_USER}>`,
-    to: input.to,
-    subject: "Redefinir sua senha",
-    html: passwordResetEmailHtml(input.resetUrl),
-  });
+  console.log("[reset-debug] b. enviando e-mail via nodemailer", { to: input.to });
+  try {
+    const info = await getTransporter().sendMail({
+      from: `Agendamentos <${process.env.GMAIL_USER}>`,
+      to: input.to,
+      subject: "Redefinir sua senha",
+      html: passwordResetEmailHtml(input.resetUrl),
+    });
+    console.log("[reset-debug] c. sendMail retornou", { messageId: info.messageId, response: info.response });
+  } catch (error) {
+    console.error("[reset-debug] c. sendMail lançou erro", error);
+    throw error;
+  }
 }
