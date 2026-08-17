@@ -32,7 +32,7 @@ export function ResetPasswordForm({ token, email }: { token: string; email: stri
 
   if (done) {
     return (
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5">
+      <div className="rounded-2xl border border-zinc-200 bg-white p-5 text-center">
         <p className="text-sm font-medium text-zinc-950">Senha redefinida</p>
         <p className="mt-2 text-sm leading-relaxed text-zinc-500">
           Sua senha foi alterada. Você já pode entrar com a nova senha.
